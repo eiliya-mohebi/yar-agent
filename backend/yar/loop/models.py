@@ -5,19 +5,21 @@ default via YAR_BASE_URL). No PROVIDERS table, no Anthropic adapter — the
 loop speaks OpenAI shape natively.
 
 Production quirks that would otherwise break the tool loop:
-  - prefer max_completion_tokens; retry as max_tokens only when the error
-    mentions that param name
+  - prefer max_completion_tokens; if the error mentions that param /
+    max_tokens, retry with the other name only
   - empty choices → clear RuntimeError (not choices[0] TypeError)
   - streaming reassembles incremental tool-call argument fragments
+  - rate limits / API refusals surface as RuntimeError, not raw tracebacks
 """
 
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from types import SimpleNamespace
 from typing import Any
 
-from openai import OpenAI
+from openai import APIError, OpenAI
 
 from yar.config import Settings
 
@@ -38,6 +40,7 @@ def get_client(settings: Settings) -> YarClient:
             "spaces or line breaks."
         ) from exc
 
+    # Call-site knob (ARCHITECTURE §9) — not on the Settings dataclass.
     timeout = float(os.getenv("YAR_LLM_TIMEOUT", "120"))
     return YarClient(api_key=api_key, base_url=settings.base_url, timeout=timeout)
 
@@ -62,12 +65,17 @@ class YarClient:
         try:
             return self._raw.chat.completions.create(**kwargs, **extra)
         except Exception as exc:
-            m = str(exc).lower()
-            if "max_completion_tokens" not in m and "max_tokens" not in m:
+            message = str(exc).lower()
+            if "max_completion_tokens" not in message and "max_tokens" not in message:
                 raise
-            k = dict(kwargs)
-            k["max_tokens"] = k.pop("max_completion_tokens", None)
-            return self._raw.chat.completions.create(**k, **extra)
+            swapped = dict(kwargs)
+            if "max_completion_tokens" in swapped:
+                swapped["max_tokens"] = swapped.pop("max_completion_tokens")
+            elif "max_tokens" in swapped:
+                swapped["max_completion_tokens"] = swapped.pop("max_tokens")
+            else:
+                raise
+            return self._raw.chat.completions.create(**swapped, **extra)
 
 
 class _Completions:
@@ -75,7 +83,11 @@ class _Completions:
         self._client = client
 
     def create(self, **kwargs: Any):
-        response = self._client._call(kwargs)
+        try:
+            response = self._client._call(kwargs)
+        except APIError as exc:
+            model = kwargs.get("model", "?")
+            raise RuntimeError(f"{model}: {exc}") from exc
         if not getattr(response, "choices", None):
             err = getattr(response, "error", None) or "endpoint returned no choices"
             model = kwargs.get("model", "?")
@@ -97,18 +109,30 @@ class _CompletionStream:
         self._text: list[str] = []
         self._tools: dict[int, dict[str, str | None]] = {}
         self._usage = None
+        self._text_stream: Iterator[str] | None = None
 
     def __enter__(self) -> _CompletionStream:
+        # Start the HTTP stream once — .text_stream must not re-call the API.
+        self._text_stream = self._consume()
         return self
 
     def __exit__(self, *exc: object) -> bool:
         return False
 
     @property
-    def text_stream(self):
-        stream = self._client._call(
-            self._kwargs, stream=True, stream_options={"include_usage": True}
-        )
+    def text_stream(self) -> Iterator[str]:
+        if self._text_stream is None:
+            raise RuntimeError("stream text_stream used outside the with-block")
+        return self._text_stream
+
+    def _consume(self) -> Iterator[str]:
+        try:
+            stream = self._client._call(
+                self._kwargs, stream=True, stream_options={"include_usage": True}
+            )
+        except APIError as exc:
+            model = self._kwargs.get("model", "?")
+            raise RuntimeError(f"{model}: {exc}") from exc
         for chunk in stream:
             if getattr(chunk, "usage", None):
                 self._usage = chunk.usage

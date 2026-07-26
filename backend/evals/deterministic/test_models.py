@@ -74,6 +74,18 @@ def test_empty_choices_raises_clear_error(monkeypatch):
         )
 
 
+def _ok_response(text: str = "ok"):
+    return SimpleNamespace(
+        choices=[
+            SimpleNamespace(
+                message=SimpleNamespace(content=text, tool_calls=None),
+                finish_reason="stop",
+            )
+        ],
+        usage=SimpleNamespace(prompt_tokens=1, completion_tokens=1),
+    )
+
+
 def test_max_completion_tokens_retries_as_max_tokens(monkeypatch):
     client = _stub_client(monkeypatch)
     calls: list[dict] = []
@@ -82,15 +94,7 @@ def test_max_completion_tokens_retries_as_max_tokens(monkeypatch):
         calls.append(kwargs)
         if "max_completion_tokens" in kwargs:
             raise ValueError("Unsupported parameter: 'max_completion_tokens'")
-        return SimpleNamespace(
-            choices=[
-                SimpleNamespace(
-                    message=SimpleNamespace(content="ok", tool_calls=None),
-                    finish_reason="stop",
-                )
-            ],
-            usage=SimpleNamespace(prompt_tokens=1, completion_tokens=1),
-        )
+        return _ok_response()
 
     client._raw = SimpleNamespace(
         chat=SimpleNamespace(completions=SimpleNamespace(create=fake_create))
@@ -105,6 +109,55 @@ def test_max_completion_tokens_retries_as_max_tokens(monkeypatch):
     assert "max_completion_tokens" in calls[0]
     assert "max_tokens" in calls[1]
     assert "max_completion_tokens" not in calls[1]
+
+
+def test_max_tokens_retries_as_max_completion_tokens(monkeypatch):
+    client = _stub_client(monkeypatch)
+    calls: list[dict] = []
+
+    def fake_create(**kwargs):
+        calls.append(kwargs)
+        if "max_tokens" in kwargs:
+            raise ValueError("Unsupported parameter: 'max_tokens'. Use max_completion_tokens")
+        return _ok_response()
+
+    client._raw = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=fake_create))
+    )
+
+    out = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[{"role": "user", "content": "hi"}],
+        max_tokens=16,
+    )
+    assert out.choices[0].message.content == "ok"
+    assert "max_tokens" in calls[0]
+    assert "max_completion_tokens" in calls[1]
+    assert "max_tokens" not in calls[1]
+
+
+def test_api_error_surfaces_as_runtime_error(monkeypatch):
+    import httpx
+    from openai import APIError
+
+    client = _stub_client(monkeypatch)
+
+    def boom(**kwargs):
+        raise APIError(
+            "Rate limit exceeded",
+            httpx.Request("POST", "https://api.avalai.ir/v1/chat/completions"),
+            body=None,
+        )
+
+    client._raw = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=boom))
+    )
+    with pytest.raises(RuntimeError, match="Rate limit exceeded"):
+        client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": "hi"}],
+            max_completion_tokens=16,
+        )
 
 
 def test_stream_reassembles_tool_call_argument_fragments(monkeypatch):
