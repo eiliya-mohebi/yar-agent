@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Yar runtime home (memory, traces, calendar, outbox)
+.yar/
+**/.yar/
+
 # Python
 __pycache__/
 *.py[cod]
