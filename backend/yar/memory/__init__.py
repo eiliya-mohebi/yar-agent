@@ -1,20 +1,23 @@
-"""Memory facade — chat_log persistence for sessions; stores arrive next.
+"""Memory facade — chat_log + procedural skills; gate/consolidation arrive next.
 
-    procedural  SKILL.md files      how to act     (skills issue)
+    procedural  SKILL.md files      how to act
     semantic    facts table (FTS5)  what is true   (already in semantic/)
     episodic    episodes table      what happened  (already in episodic/)
 
-This issue wires the chat_log side Session needs: log_chat, session_history,
-list_sessions. gated_retrieve / matching_skills are no-ops until the gate and
-skills issues land — Session already treats empty as "skip that section."
+gated_retrieve stays a no-op until the retrieval-gate issue.
 """
 
 from __future__ import annotations
 
 import json
 import sqlite3
+from pathlib import Path
 
 from yar.config import Settings
+from yar.memory.procedural.loader import SkillLoader
+
+# Built-in skills live next to the package under backend/skills/.
+REPO_SKILLS = Path(__file__).resolve().parents[2] / "skills"
 
 
 class Memory:
@@ -22,14 +25,15 @@ class Memory:
         self.conn = conn
         self.settings = settings
         self.client = client
+        self.skills = SkillLoader([REPO_SKILLS, settings.home / "skills"])
 
     def gated_retrieve(self, message: str, notify=None) -> str:
         # Filled in by the retrieval-gate issue. Empty = skip memory section.
         return ""
 
     def matching_skills(self, message: str) -> str:
-        # Filled in by the skills issue. Empty = skip skills section.
-        return ""
+        matched = self.skills.match(message)
+        return "\n\n".join(f"### {s.name}\n{s.body}" for s in matched)
 
     def log_chat(
         self,
