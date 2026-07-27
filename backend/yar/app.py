@@ -27,7 +27,7 @@ class Yar:
         self.conn = conn or connect(self.settings.home)
         self.client = client or get_client(self.settings)
         self.memory = Memory(self.conn, self.settings, self.client)
-        self.tools = build_registry(self.conn, self.settings)
+        self.tools = build_registry(self.conn, self.settings, self.memory)
         self.session = Session(self.settings, memory=self.memory)
         self.tracer = Tracer(self.settings)
 
@@ -90,6 +90,8 @@ class Yar:
                 source=source,
                 meta=meta,
             )
+            self.memory.maybe_consolidate(notify=notify)
+            self.memory.export_markdown()
 
         self.tracer.end_turn(result.reply, result.iterations)
         return result

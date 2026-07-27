@@ -6,7 +6,7 @@ Sessions are just labels on chat_log rows; switch reloads working memory.
 
 from __future__ import annotations
 
-from evals.helpers import ScriptedClient, make_yar, text_response, tool_response
+from evals.helpers import ScriptedClient, gate_skip, make_yar, text_response, tool_response
 
 
 def test_history_records_tool_use(tmp_path):
@@ -16,6 +16,7 @@ def test_history_records_tool_use(tmp_path):
         home,
         client=ScriptedClient(
             [
+                gate_skip(),
                 tool_response(
                     "create_event", {"title": "X", "start": "2026-07-14T09:00"}
                 ),
@@ -40,11 +41,13 @@ def test_foldin_appears_in_next_turn_prompt(tmp_path):
         tmp_path / "home",
         client=Recorder(
             [
+                gate_skip(),
                 tool_response(
                     "create_event",
                     {"title": "Swim", "start": "2026-07-11T17:00"},
                 ),
                 text_response("Booked."),
+                gate_skip(),
                 text_response("Already booked — see history."),
             ]
         ),
@@ -59,7 +62,9 @@ def test_foldin_appears_in_next_turn_prompt(tmp_path):
 
 def test_add_exchange_persists_to_chat_log_with_session_id(tmp_path):
     home = tmp_path / "home"
-    app = make_yar(home, client=ScriptedClient([text_response("hi back")]))
+    app = make_yar(
+        home, client=ScriptedClient([gate_skip(), text_response("hi back")])
+    )
     app.session.start_new("s-persist")
     app.respond("hello")
 
@@ -79,7 +84,14 @@ def test_switch_reloads_recent_history_from_chat_log(tmp_path):
     app = make_yar(
         home,
         client=ScriptedClient(
-            [text_response("one"), text_response("two"), text_response("fresh")]
+            [
+                gate_skip(),
+                text_response("one"),
+                gate_skip(),
+                text_response("two"),
+                gate_skip(),
+                text_response("fresh"),
+            ]
         ),
     )
     app.session.start_new("s-a")

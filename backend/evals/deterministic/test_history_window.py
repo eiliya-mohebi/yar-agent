@@ -6,7 +6,7 @@ prompt, so context/cost/latency stay flat.
 
 from __future__ import annotations
 
-from evals.helpers import ScriptedClient, make_yar, text_response
+from evals.helpers import ScriptedClient, gate_skip, make_yar, text_response
 
 
 def test_prompt_history_is_windowed(tmp_path):
@@ -18,7 +18,10 @@ def test_prompt_history_is_windowed(tmp_path):
             sent.append(list(kwargs.get("messages", [])))
             return self._script.pop(0)
 
-    script = [text_response("ok") for _ in range(5)]
+    # 5 turns; each turn = gate (skip) + one loop call
+    script = []
+    for _ in range(5):
+        script += [gate_skip(), text_response("ok")]
     app = make_yar(
         tmp_path / "home",
         client=Recorder(script),
@@ -47,9 +50,12 @@ def test_default_window_is_generous_but_finite(tmp_path, monkeypatch):
 
 def test_older_turns_remain_in_state_db_after_window(tmp_path):
     """Full history stays in chat_log even when the prompt is windowed."""
+    script = []
+    for _ in range(5):
+        script += [gate_skip(), text_response("ok")]
     app = make_yar(
         tmp_path / "home",
-        client=ScriptedClient([text_response("ok") for _ in range(5)]),
+        client=ScriptedClient(script),
         history_turns=2,
     )
     for i in range(5):

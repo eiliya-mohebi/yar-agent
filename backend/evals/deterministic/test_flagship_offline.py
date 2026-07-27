@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from types import SimpleNamespace
 
-from evals.helpers import ScriptedClient, make_yar, text_response, tool_response
+from evals.helpers import ScriptedClient, gate_skip, make_yar, text_response, tool_response
 
 
 def test_make_yar_isolates_home(tmp_path, monkeypatch):
@@ -17,7 +17,9 @@ def test_make_yar_isolates_home(tmp_path, monkeypatch):
     (real_home / "MUST_NOT_TOUCH").write_text("sentinel")
 
     isolated = tmp_path / "eval-home"
-    app = make_yar(isolated, client=ScriptedClient([text_response("hi")]))
+    app = make_yar(
+        isolated, client=ScriptedClient([gate_skip(), text_response("hi")])
+    )
     app.respond("hello")
 
     assert app.settings.home == isolated
@@ -29,6 +31,7 @@ def test_offline_book_meeting_english(tmp_path):
     home = tmp_path / "home"
     client = ScriptedClient(
         [
+            gate_skip(),
             tool_response(
                 "create_event",
                 {"title": "Coffee with Alex", "start": "2026-07-14T09:00"},
@@ -51,6 +54,7 @@ def test_offline_book_meeting_persian(tmp_path):
     home = tmp_path / "home"
     client = ScriptedClient(
         [
+            gate_skip(),
             tool_response(
                 "create_event",
                 # Same meeting as EN; Persian digits fold to the same ISO start.
@@ -105,7 +109,7 @@ def test_offline_rebook_is_idempotent_via_respond(tmp_path):
     )
     app = make_yar(
         home,
-        client=ScriptedClient([multi, text_response("Booked once.")]),
+        client=ScriptedClient([gate_skip(), multi, text_response("Booked once.")]),
     )
     result = app.respond("swim with sergey saturday 5pm")
 

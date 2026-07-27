@@ -84,8 +84,7 @@ class Session:
         if self.memory is not None:
             # Hero moment #1: a cheap judge decides IF we retrieve at all —
             # default-on retrieval is slow and biases answers (see
-            # memory/retrieval_gate.py for the why). Arrives with the gate issue;
-            # until then gated_retrieve may simply return "".
+            # memory/retrieval_gate.py for the why).
             retrieved = self.memory.gated_retrieve(user_message, notify=notify)
             if retrieved:
                 parts.append("\nRelevant memory:\n" + retrieved)

@@ -9,7 +9,7 @@ from http.server import ThreadingHTTPServer
 
 import pytest
 
-from evals.helpers import ScriptedClient, make_yar, text_response
+from evals.helpers import ScriptedClient, gate_skip, make_yar, text_response
 from yar.ops import dashboard as dash
 
 REQUIRED_DATA_KEYS = {
@@ -128,7 +128,7 @@ def test_session_new_switch_history(server, dash_home):
     host, port, _ = server
 
     # Seed a past session via make_yar so switch has something to load.
-    client = ScriptedClient([text_response("سلام!")])
+    client = ScriptedClient([gate_skip(), text_response("سلام!")])
     yar = make_yar(dash_home, client=client, model="gpt-4.1-mini")
     yar.session.session_id = "past-1"
     yar.respond("سلام", source="dashboard")
@@ -171,7 +171,7 @@ def _scripted_agent(home, client):
 
 def test_chat_returns_reply(server, dash_home, monkeypatch):
     # Inject a scripted agent so chat never hits the network.
-    client = ScriptedClient([text_response("پاسخ فارسی")])
+    client = ScriptedClient([gate_skip(), text_response("پاسخ فارسی")])
     agent = _scripted_agent(dash_home, client)
     monkeypatch.setattr(dash, "_get_agent", lambda: agent)
 
@@ -188,7 +188,7 @@ def test_chat_returns_reply(server, dash_home, monkeypatch):
 
 
 def test_chat_stream_sse_kinds(server, dash_home, monkeypatch):
-    client = ScriptedClient([text_response("done")])
+    client = ScriptedClient([gate_skip(), text_response("done")])
     agent = _scripted_agent(dash_home, client)
     monkeypatch.setattr(dash, "_get_agent", lambda: agent)
 

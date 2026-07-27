@@ -29,6 +29,20 @@ def text_response(text: str):
     )
 
 
+def gate_skip(reason: str = "test"):
+    """Scripted small-model reply: retrieval gate says skip."""
+    return text_response(
+        f'{{"retrieve": false, "query": "", "reason": "{reason}"}}'
+    )
+
+
+def gate_retrieve(query: str, reason: str = "needs memory"):
+    """Scripted small-model reply: retrieval gate says retrieve."""
+    return text_response(
+        f'{{"retrieve": true, "query": "{query}", "reason": "{reason}"}}'
+    )
+
+
 def tool_response(name: str, args: dict, call_id: str = "call_1"):
     """OpenAI-shaped response that requests one tool call."""
     return SimpleNamespace(
