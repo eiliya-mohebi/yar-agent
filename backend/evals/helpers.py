@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from types import SimpleNamespace
 
 
@@ -63,3 +64,14 @@ class ScriptedClient:
         if not self._script:
             raise LookupError("ScriptedClient: no more scripted responses")
         return self._script.pop(0)
+
+
+def make_yar(home: Path, client=None, **settings_overrides):
+    """Build a Yar with an isolated home dir; optionally swap in a fake client."""
+    from yar.app import Yar
+    from yar.config import Settings
+
+    settings = Settings(home=home, **settings_overrides)
+    if client is not None and not settings.api_key:
+        settings.api_key = "offline"  # never require a real key for scripted runs
+    return Yar(settings=settings, client=client)
