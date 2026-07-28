@@ -1,0 +1,19 @@
+{"id": "schedule-basic", "input": "Schedule a coffee with Alex next Tuesday at 9am", "expect_tool": "create_event", "expect_in_args": {"title": "alex", "start": "T09:00"}}
+{"id": "schedule-basic-fa", "input": "یک قهوه با الکس برای سه‌شنبه آینده ساعت ۹ صبح بگذار", "expect_tool": "create_event", "expect_in_args": {"start": "T09:00"}}
+{"id": "schedule-applies-memory", "setup_fact": {"subject": "alex", "content": "Alex prefers morning meetings"}, "input": "Book a catch-up with Alex on Friday", "expect_tool": "create_event", "expect_in_args": {"title": "alex"}}
+{"id": "schedule-applies-memory-fa", "setup_fact": {"subject": "alex", "content": "Alex prefers morning meetings"}, "input": "یک قرار پیگیری با الکس برای جمعه بگذار", "expect_tool": "create_event"}
+{"id": "remember-preference", "input": "Remember that Alex prefers morning meetings", "expect_tool": "save_note", "expect_in_args": {"content": "morning"}}
+{"id": "draft-message", "input": "Send Alex a message that the demo moved to Friday", "expect_tool": "send_message", "expect_in_args": {"body": "friday"}}
+{"id": "no-tool-general-knowledge", "input": "What is the capital of France?", "expect_tool": null}
+{"id": "pokemon-team", "input": "Build me a Kanto starter team around Pikachu: search current competitive picks for a balanced six, remember that Pikachu is my starter, and schedule two team-training sessions this week", "expect_tool": "save_note", "expect_in_args": {"content": "pikachu"}, "expect_min_tool_calls": 3}
+{"id": "worldcup-final", "input": "Search for the result of the Spain vs Argentina World Cup final, remember who won, and draft a message to Raj about watching the highlights together", "expect_tool": "send_message", "expect_in_args": {"to": "raj"}, "expect_min_tool_calls": 3}
+{"id": "chitchat-no-action", "input": "I might grab coffee with Alex sometime, we'll see.", "expect_tool": null}
+{"id": "chitchat-no-action-fa", "input": "شاید یه وقتایی با الکس قهوه بخوریم، ببینیم چه می‌شود.", "expect_tool": null}
+{"id": "exact-count-sessions", "input": "Block three 25-minute focus sessions tomorrow morning", "expect_tool": "create_event", "expect_min_tool_calls": 3}
+{"id": "exact-count-sessions-fa", "input": "سه جلسه تمرکز ۲۵ دقیقه‌ای برای فردا صبح بلوک کن", "expect_tool": "create_event", "expect_min_tool_calls": 3}
+{"id": "remember-and-book", "input": "Remember that I'm vegetarian, then book dinner with Sam this Thursday at 7pm", "expect_tool": "create_event", "expect_in_args": {"title": "sam"}, "expect_min_tool_calls": 2}
+{"id": "remember-and-book-fa", "input": "یادت باشد که گیاه‌خوارم، بعد شام با سم را برای پنج‌شنبه ساعت ۷ عصر رزرو کن", "expect_tool": "create_event", "expect_min_tool_calls": 2}
+{"id": "read-before-write", "input": "Check my calendar for a free 30 minutes this afternoon and schedule a short walk", "expect_tool": "create_event", "expect_min_tool_calls": 2}
+{"id": "read-before-write-fa", "input": "تقویمم را برای نیم ساعت آزاد امروز عصر چک کن و یک پیاده‌روی کوتاه بگذار", "expect_tool": "create_event", "expect_min_tool_calls": 2}
+{"id": "mixed-script-schedule", "input": "book جلسه with Alex فردا at 3pm", "expect_tool": "create_event", "expect_in_args": {"start": "T15:00"}}
+{"id": "mixed-script-schedule-fa", "input": "جلسه with Alex فردا ساعت ۱۵ را بگذار", "expect_tool": "create_event", "expect_in_args": {"start": "T15:00"}}

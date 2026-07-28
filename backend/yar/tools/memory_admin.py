@@ -165,7 +165,8 @@ def make_create_skill_tool(settings, memory) -> Tool:
         description=(
             "Write a new reusable skill (a SKILL.md the agent loads when relevant) so you "
             "can repeat a workflow the user taught you. Only call this after the user agrees. "
-            "body = step-by-step instructions; description = when to use it (include trigger words)."
+            "body = step-by-step instructions; description = when to use it "
+            "(include trigger words)."
         ),
         input_schema={
             "type": "object",

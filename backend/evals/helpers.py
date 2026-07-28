@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from types import SimpleNamespace
 
 
 def _has_key() -> bool:
-    """True when OPENAI_API_KEY or YAR_API_KEY is set (live AvalAI smoke)."""
-    return bool(os.getenv("OPENAI_API_KEY") or os.getenv("YAR_API_KEY"))
+    """True when OPENAI_API_KEY or YAR_API_KEY is set (live AvalAI smoke).
+
+    Goes through Settings so backend/.env is loaded the same way as the app.
+    """
+    from yar.config import load_settings
+
+    return bool(load_settings().api_key.strip())
 
 
 HAS_KEY = _has_key()

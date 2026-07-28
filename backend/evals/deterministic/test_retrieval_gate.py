@@ -77,7 +77,11 @@ def test_gate_fails_open_on_llm_error():
                 "completions": type(
                     "X",
                     (),
-                    {"create": staticmethod(lambda **kw: (_ for _ in ()).throw(RuntimeError("boom")))},
+                    {
+                        "create": staticmethod(
+                            lambda **kw: (_ for _ in ()).throw(RuntimeError("boom"))
+                        )
+                    },
                 )()
             },
         )()
