@@ -22,6 +22,9 @@ def test_defaults_match_architecture(monkeypatch: pytest.MonkeyPatch, tmp_path: 
     monkeypatch.delenv("YAR_CONSOLIDATE_EVERY", raising=False)
     monkeypatch.delenv("YAR_RETRIEVAL_TOP_K", raising=False)
     monkeypatch.delenv("YAR_EXPERIMENTAL", raising=False)
+    monkeypatch.delenv("YAR_WORKSPACE", raising=False)
+    monkeypatch.delenv("YAR_DELEGATE_AUTORUN", raising=False)
+    monkeypatch.delenv("YAR_AUTORUN_TIMEOUT", raising=False)
 
     s = load_settings()
     assert s.base_url == "https://api.avalai.ir/v1"
@@ -34,6 +37,9 @@ def test_defaults_match_architecture(monkeypatch: pytest.MonkeyPatch, tmp_path: 
     assert s.retrieval_top_k == 4
     assert s.home == Path(".yar")
     assert s.experimental is False
+    assert s.workspace == Path("yar_workspace")
+    assert s.delegate_autorun is True
+    assert s.autorun_timeout == 30
     assert s.api_key == ""
 
 

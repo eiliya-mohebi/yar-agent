@@ -6,6 +6,12 @@
 # Yar runtime home (memory, traces, calendar, outbox)
 .yar/
 **/.yar/
+.yar.bak-*/
+**/.yar.bak-*/
+
+# Delegated coding workspaces (outside .yar on purpose)
+yar_workspace/
+**/yar_workspace/
 
 # Python
 __pycache__/

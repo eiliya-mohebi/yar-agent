@@ -61,6 +61,17 @@ class Settings:
     experimental: bool = field(
         default_factory=lambda: os.getenv("YAR_EXPERIMENTAL", "") in ("1", "true", "yes")
     )
+    # Scratch root for delegated coding runs (outside .yar on purpose).
+    workspace: Path = field(
+        default_factory=lambda: Path(os.getenv("YAR_WORKSPACE", "yar_workspace"))
+    )
+    delegate_autorun: bool = field(
+        default_factory=lambda: os.getenv("YAR_DELEGATE_AUTORUN", "1")
+        not in ("0", "false", "no")
+    )
+    autorun_timeout: int = field(
+        default_factory=lambda: int(os.getenv("YAR_AUTORUN_TIMEOUT", "30"))
+    )
 
     # --- Tracing (JSONL always; OTel exports if an endpoint is set)
     otel_endpoint: str = field(

@@ -28,8 +28,14 @@ class Yar:
         self.client = client or get_client(self.settings)
         self.memory = Memory(self.conn, self.settings, self.client)
         self.tools = build_registry(self.conn, self.settings, self.memory)
+        self.mcp_bridge = self.tools.mcp_bridge
         self.session = Session(self.settings, memory=self.memory)
         self.tracer = Tracer(self.settings)
+
+    def close(self) -> None:
+        """Release external resources (MCP subprocesses)."""
+        if self.mcp_bridge is not None:
+            self.mcp_bridge.close()
 
     def respond(
         self,

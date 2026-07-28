@@ -374,30 +374,91 @@ def settings_info() -> dict:
     }
 
 
+_FLAGSHIP = {"create_event", "list_events", "save_note", "send_message"}
+_WEB = {"search_web"}
+_SELFMGMT = {"manage_memory", "update_soul", "create_skill"}
+_EXPERIMENTAL = {"delegate_task", "run_command", "browse_web", "schedule_task"}
+
+
+def _tool_source(name: str, mcp_servers: list[str]) -> str:
+    if name in _FLAGSHIP:
+        return "flagship"
+    if name in _WEB:
+        return "web"
+    if name in _SELFMGMT:
+        return "self-management"
+    if name in _EXPERIMENTAL:
+        return "experimental"
+    if any(name.startswith(f"{s}_") for s in mcp_servers):
+        return "mcp"
+    return "other"
+
+
 def tools_info() -> dict:
-    """Registered tool catalog for the Tools page."""
+    """Registered tool catalog + MCP status for the Tools page.
+
+    When no live agent exists, builds a display-only catalog (no MCP subprocess
+    is spawned just to render the page).
+    """
     settings = load_settings()
     settings.ensure_home()
+    mcp = {"configured": False, "servers": [], "live": False}
+    mcp_path = settings.home / "mcp.json"
+    if mcp_path.exists():
+        mcp["configured"] = True
+        try:
+            mcp["servers"] = [
+                s.get("name", "?")
+                for s in json.loads(mcp_path.read_text()).get("servers", [])
+            ]
+        except (json.JSONDecodeError, OSError):
+            pass
+
     catalog = []
     if _agent is not None:
+        mcp["live"] = getattr(_agent, "mcp_bridge", None) is not None
         tools = list(_agent.tools._tools.values())
     else:
-        from yar.tools import build_registry
+        # Display-only: same tools minus MCP (building the real registry would
+        # start MCP servers on a poll).
+        from yar.tools import calendar, memory_admin, messages, notes, search
 
         conn = connect(settings.home)
-        tools = list(build_registry(conn, settings)._tools.values())
-    flagship = {"create_event", "list_events", "save_note", "send_message"}
-    web = {"search_web"}
+        tools = [
+            calendar.make_tool(conn, settings.home),
+            calendar.make_list_tool(conn, settings.home),
+            notes.make_tool(conn),
+            messages.make_tool(settings.home),
+            search.make_tool(),
+            memory_admin.make_update_soul_tool(settings),
+        ]
+        try:
+            from yar.memory import Memory
+
+            mem = Memory(conn, settings, None)
+            tools += [
+                memory_admin.make_manage_memory_tool(mem),
+                memory_admin.make_create_skill_tool(settings, mem),
+            ]
+        except Exception:
+            pass
+        if settings.experimental:
+            from yar.tools import experimental
+
+            tools += experimental.make_tools(settings)
+
     for t in tools:
-        if t.name in flagship:
-            source = "flagship"
-        elif t.name in web:
-            source = "web"
-        else:
-            source = "other"
-        catalog.append({"name": t.name, "description": t.description, "source": source})
+        catalog.append(
+            {
+                "name": t.name,
+                "description": t.description,
+                "source": _tool_source(t.name, mcp["servers"]),
+            }
+        )
     catalog.sort(key=lambda c: (c["source"], c["name"]))
-    return {"catalog": catalog, "mcp": {"configured": False, "servers": [], "live": False}}
+    from yar.tools.experimental import PLANNED
+
+    return {"catalog": catalog, "mcp": mcp, "planned": PLANNED}
 
 
 def collect() -> dict:

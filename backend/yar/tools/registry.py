@@ -33,6 +33,7 @@ class Tool:
 class ToolRegistry:
     def __init__(self) -> None:
         self._tools: dict[str, Tool] = {}
+        self.mcp_bridge = None  # set by build_registry when MCP is wired
 
     def register(self, tool: Tool) -> None:
         self._tools[tool.name] = tool
