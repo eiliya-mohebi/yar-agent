@@ -155,8 +155,79 @@ def test_offline_dataset_cases_are_scoreable_without_network():
     assert {c["id"] for c in DATASET} >= _SEARCH_STRETCH_IDS
 
 
-# ---------- live tier: AvalAI / OpenAI when keyed ----------
+def test_soul_documents_persian_hedge_and_multi_action(tmp_path):
+    """Live regressions: FA chitchat must not save_note; یادت باشد+رزرو = two tools."""
+    from yar.runtime.session import DEFAULT_SOUL
 
+    assert "شاید" in DEFAULT_SOUL
+    assert "ببینیم چه می‌شود" in DEFAULT_SOUL
+    assert "یادت باشد" in DEFAULT_SOUL
+    assert "save_note AND create_event" in DEFAULT_SOUL
+
+
+def test_offline_remember_and_book_fa_needs_both_tools(tmp_path):
+    """Regression for live remember-and-book-fa: one tool alone must fail the case."""
+    case = next(c for c in DATASET if c["id"] == "remember-and-book-fa")
+    only_book = [
+        {"tool": "create_event", "args": {"title": "شام با سم", "start": "2026-07-30T19:00"}}
+    ]
+    ok, why = scoring.check_case(case, only_book)
+    assert not ok and ">= 2" in why
+
+    multi = SimpleNamespace(
+        choices=[
+            SimpleNamespace(
+                message=SimpleNamespace(
+                    content=None,
+                    tool_calls=[
+                        SimpleNamespace(
+                            id="c1",
+                            type="function",
+                            function=SimpleNamespace(
+                                name="save_note",
+                                arguments=json.dumps(
+                                    {"subject": "diet", "content": "گیاه‌خوارم"}
+                                ),
+                            ),
+                        ),
+                        SimpleNamespace(
+                            id="c2",
+                            type="function",
+                            function=SimpleNamespace(
+                                name="create_event",
+                                arguments=json.dumps(
+                                    {
+                                        "title": "شام با سم",
+                                        "start": "2026-07-30T19:00",
+                                    }
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+                finish_reason="tool_calls",
+            )
+        ],
+        usage=SimpleNamespace(prompt_tokens=0, completion_tokens=0),
+    )
+    app = make_yar(
+        tmp_path / "home",
+        client=ScriptedClient([gate_skip(), multi, text_response("انجام شد.")]),
+    )
+    result = app.respond(case["input"])
+    ok, why = scoring.check_case(case, result.tool_calls)
+    assert ok, why
+
+
+def test_offline_chitchat_fa_fails_if_save_note_fires():
+    """Regression for live chitchat-no-action-fa: hedged FA must score as no-tool."""
+    case = next(c for c in DATASET if c["id"] == "chitchat-no-action-fa")
+    ok, why = scoring.check_case(case, [{"tool": "save_note", "args": {}}])
+    assert not ok and "save_note" in why
+    assert scoring.check_case(case, [])[0]
+
+
+# ---------- live tier: AvalAI / OpenAI when keyed ----------
 
 @pytest.mark.skipif(not HAS_KEY, reason="live eval needs OPENAI_API_KEY or YAR_API_KEY")
 @pytest.mark.parametrize("case", LIVE_DATASET, ids=[c["id"] for c in LIVE_DATASET])
