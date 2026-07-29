@@ -155,6 +155,132 @@ export type Stats = {
   trace_files: number
 }
 
+export type EvalReport = {
+  passed?: number
+  failed?: number
+  total?: number
+  cases?: unknown[]
+  [key: string]: unknown
+}
+
+export type ModelEntry = {
+  id: string
+  free?: boolean
+  tools?: boolean
+  reasoning?: boolean
+  context?: number
+  price_in?: number
+  price_out?: number
+}
+
+export type ModelCatalog = {
+  models: ModelEntry[]
+  listed: boolean
+  endpoint: string
+  model: string
+  small_model: string
+  pinned: string[]
+  error?: string
+}
+
+export type SettingsApplyResponse = SettingsInfo & {
+  ok?: boolean
+  error?: string
+}
+
+export type PinAction = 'pin' | 'unpin' | 'default'
+
+export type PinResponse = SettingsApplyResponse
+
+export type MemoryActionBody = {
+  action: string
+  [key: string]: unknown
+}
+
+export type MemoryActionResponse = {
+  ok?: boolean
+  error?: string
+}
+
+export type QueryResponse = {
+  columns?: string[]
+  rows?: string[][]
+  error?: string
+}
+
+export type RevealResponse = {
+  ok?: boolean
+  error?: string
+  path?: string
+  opened_in?: string
+  revealed?: string
+}
+
+export type CompareQuality = {
+  score?: number
+  reason?: string
+  judge?: string
+}
+
+export type CompareResult = {
+  spec?: string
+  provider?: string
+  model?: string
+  reply?: string
+  error?: string
+  gate?: GateDecision | string | null
+  iterations?: number
+  latency_ms?: number
+  tools?: ({ tool: string } | string)[]
+  tokens_in?: number
+  tokens_out?: number
+  cost_usd?: number
+  completion?: { passed?: boolean; why?: string; case?: string } | null
+  quality?: CompareQuality | null
+  streaming?: boolean
+  _grading?: boolean
+}
+
+export type CompareRun = {
+  ts?: string
+  message?: string
+  results?: CompareResult[]
+}
+
+export type CompareAggregate = {
+  spec?: string
+  provider?: string
+  model?: string
+  runs?: number
+  ok?: number
+  total_latency_ms?: number
+  total_tokens_in?: number
+  total_tokens_out?: number
+  total_tokens?: number
+  cases_passed?: number
+  cases_scored?: number
+  quality_n?: number
+  quality_avg?: number | null
+  total_cost_usd?: number
+  rate_in?: number
+  rate_out?: number
+  [key: string]: unknown
+}
+
+export type CompareHistoryResponse = {
+  runs: CompareRun[]
+  aggregate: CompareAggregate[]
+}
+
+export type CompareStreamEvent =
+  | { kind: 'start'; spec?: string; provider?: string; model?: string }
+  | { kind: 'gate'; spec?: string; decision?: string; reason?: string }
+  | { kind: 'tool'; spec?: string; tool?: string }
+  | { kind: 'result'; [key: string]: unknown }
+  | { kind: 'grading'; n?: number; judge?: string; done?: number }
+  | { kind: 'grade'; spec?: string; quality?: CompareQuality | null }
+  | { kind: 'done'; error?: string; [key: string]: unknown }
+
 export type DashboardData = {
   generated_at: string
   home: string
@@ -176,7 +302,8 @@ export type DashboardData = {
   calendar: CalendarEvent[]
   outbox: OutboxDraft[]
   skills: SkillRow[]
-  eval_report: unknown | null
+  eval_report: EvalReport | null
+  eval_history?: unknown[]
   db: DbInfo
   settings: SettingsInfo
   tools: ToolsInfo

@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Transcript } from '@/components/chat/Transcript'
 import { CollapseEnd } from '@/components/layout/Chevrons'
+import { ModelChip } from '@/components/models/ModelChip'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ type Props = {
   onToggleTele: () => void
   onSend: (text: string) => void
   onClose: () => void
+  onRefresh: () => Promise<void>
 }
 
 export function Dock({
@@ -40,6 +42,7 @@ export function Dock({
   onToggleTele,
   onSend,
   onClose,
+  onRefresh,
 }: Props) {
   const { t } = useLang()
   const [draft, setDraft] = useState('')
@@ -100,13 +103,11 @@ export function Dock({
         >
           {t.stats}
         </Button>
-        <span
-          className="ms-auto max-w-[140px] truncate rounded-full border border-[var(--line2)] bg-[var(--accent-soft)] px-2.5 py-1 font-mono text-[11px] text-[var(--ink)]"
-          dir="ltr"
-          title={data?.model}
-        >
-          {data?.model || '—'}
-        </span>
+        <ModelChip
+          data={data}
+          onRefresh={onRefresh}
+          className="ms-auto max-w-[160px]"
+        />
         <button
           type="button"
           className="rounded px-1 text-xs text-[var(--ink3)] hover:text-[var(--ink)]"

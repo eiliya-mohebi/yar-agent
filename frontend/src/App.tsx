@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Shell } from '@/components/layout/Shell'
+import { EditingProvider } from '@/hooks/useEditing'
 import { LangProvider } from '@/hooks/useLang'
 
 function ShellRoutes() {
@@ -14,13 +15,15 @@ function ShellRoutes() {
 export function App() {
   return (
     <LangProvider>
-      <TooltipProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/*" element={<ShellRoutes />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <EditingProvider>
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/*" element={<ShellRoutes />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </EditingProvider>
     </LangProvider>
   )
 }
