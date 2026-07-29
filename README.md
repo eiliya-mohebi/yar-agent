@@ -1,14 +1,198 @@
-# yar-agent
+<p align="center">
+  <img src="docs/assets/yar-logo.png" alt="Yar — companion, helper" width="420" />
+</p>
 
-**Yar** (یار — "companion, helper") is a local-first personal assistant that makes the four
+<h1 align="center">yar-agent</h1>
+
+**Yar** (یار — "companion, helper") is a local-first personal assistant that keeps the four
 pillars behind every serious agent legible: **Harness, Loop, Memory, and Eval/LLM-Ops**.
-Everything runs on your machine against one SQLite file — no server, no framework magic. The
-whole agent loop is a ~95-line while-loop you can read in an afternoon.
+Everything runs on your machine against one SQLite file — no cloud server, no framework magic.
+The whole agent loop is a ~95-line while-loop you can read in an afternoon.
+
+Persian (فارسی) and English are both first-class. Ask in either language (or mix them) and Yar
+replies in the same language.
 
 The repo is split into a **backend** (Python agent + API server, managed with **uv**) and a
 **frontend** (Vite + React SPA, managed with **pnpm**).
 
-## Stack
+---
+
+## ⚙️ How Yar works — the four pillars
+
+```
+You (CLI or dashboard)
+  -> Gateway          # moves text in/out — no reasoning
+  -> Session          # builds the system prompt (SOUL + clock + memory + skills)
+  -> Loop             # reason -> act -> observe until a reply
+  -> Memory           # save the turn; maybe consolidate into facts/episodes
+  -> Tracer           # append a JSONL trace for this run
+```
+
+### 🔌 Harness / Gateway
+
+The gateway only moves text. It does not think.
+
+| Gateway | What it does |
+| ------- | ------------ |
+| **CLI** (`uv run yar`) | Terminal chat; live tool/gate feedback; `/memory`, `/quit` |
+| **Dashboard SPA** | Vite + React UI talking to the API on `:7777` |
+
+Same agent underneath. Pick the surface that fits the moment.
+
+### 🔄 Loop
+
+`run_loop()` is the entire agent — a reason → act → observe cycle:
+
+1. Call the LLM with system prompt + history + your message.
+2. If the model returns tool calls → run them, feed results back, repeat.
+3. If the model replies in plain text → done (guardrail 1).
+4. If `max_iterations` is hit → hard stop (guardrail 2). Never spin forever.
+
+Working memory is rebuilt **every turn**: `SOUL.md` persona, a bilingual clock line
+(Gregorian + Jalali), optional gated memory, and any matching skills.
+
+### 🧠 Memory
+
+Three kinds of durable state, all local:
+
+| Kind | What it stores | Where |
+| ---- | -------------- | ----- |
+| **Semantic** | Durable facts ("name is ایلیا", "loves soccer") | SQLite FTS5 / BM25 |
+| **Episodic** | Dated summaries of what happened | SQLite + recency |
+| **Procedural** | How-to playbooks (`SKILL.md`) | Disk under `skills/` and `.yar/skills/` |
+
+Two design choices matter:
+
+- **Retrieval gate** — a small model first answers "does this turn need memory?" Skip search
+  when it does not. Fails open (retrieve on error).
+- **Consolidation** — after enough unconsolidated chats, a summarizer distills them into facts
+  + one episode. Loss-safe: if summarization fails, the chat log stays unmarked.
+
+A human-readable mirror is written to `.yar/MEMORY.md` after every turn.
+
+### 📊 Eval / LLM-Ops
+
+| Piece | Role |
+| ----- | ---- |
+| **Tracing** | Every run → `.yar/traces/YYYY-MM-DD.jsonl` (+ optional OTel) |
+| **Dashboard API** | REST/SSE on `127.0.0.1:7777` for the SPA |
+| **Deterministic evals** | 0/1: "did the right tool fire?" (`make eval`) |
+| **Judge evals** | Scored quality: "was the reply good?" (`make eval-judge`) |
+| **Release gate** | `make gate` — deterministic must be 100%, then judge if a key exists |
+
+Deterministic and judge suites never mix. One is a unit test; the other is a scored opinion.
+
+---
+
+## 🇮🇷 Features with Persian examples
+
+Yar replies in the language you use. Tool arguments stay canonical (ISO dates, English-ish
+keys); the spoken reply stays فارسی when you write فارسی.
+
+### 📅 Calendar — schedule and list events
+
+Flagship teaching task. Creates a row in `calendar_events` and updates `.yar/calendar.ics`.
+
+```text
+شما: فردا ساعت ۱۰ صبح با دانیال جلسه بگذار برای بررسی پروژه
+یار:  ثبت شد — «جلسه با دانیال» فردا ساعت ۱۰:۰۰ (با یادداشت بررسی پروژه).
+
+شما: جلسه‌های این هفته را نشان بده
+یار:  [list_events] … لیست رویدادهای هفته را برمی‌گرداند
+```
+
+Jalali dates work too — the clock line gives the model both calendars:
+
+```text
+شما: ۵ مرداد ساعت ۱۴ یک قرار قهوه با سارا بگذار
+```
+
+### 📝 Notes — save facts to semantic memory
+
+```text
+شما: یادداشت کن که اسم من ایلیاست و بهترین دوستم دانیال است
+یار:  ذخیره شد. از این به بعد این‌ها را در حافظه دارم.
+
+شما: من عاشق فوتبالم
+یار:  یادداشت شد.
+```
+
+### 📨 Messages — draft to the local outbox
+
+Writes a draft file under `.yar/outbox/` (does not send email for real).
+
+```text
+شما: یک پیام برای دانیال بنویس که جلسه فردا ساعت ۱۰ است
+یار:  پیش‌نویس در outbox ذخیره شد.
+```
+
+### 🔍 Web search
+
+```text
+شما: قهرمان جام جهانی ۲۰۲۲ چه تیمی بود؟
+یار:  [search_web] … پاسخ را از نتایج جستجو می‌سازد
+```
+
+### 💡 Memory recall — retrieval gate + search
+
+On a later turn, the gate may pull facts/episodes into context:
+
+```text
+شما: بهترین دوست من کیه؟
+یار:  دانیال — قبلاً گفتی بهترین دوستت دانیال است.
+```
+
+Inspect memory from the CLI with `/memory`, or open the Memory pages in the dashboard.
+
+### 📖 Skills — procedural playbooks
+
+Built-in skills (e.g. `schedule-meeting`, `weekly-brief`) match on keyword overlap in
+Persian **and** English. Descriptions carry trigger words in both languages.
+
+```text
+شما: یک جلسه برنامه‌ریزی کن با علی برای سه‌شنبه صبح
+یار:  [skill: schedule-meeting] → create_event …
+```
+
+Install more with:
+
+```bash
+uv run yar skill install <url>
+```
+
+### ☀️ Morning brief
+
+```bash
+uv run yar brief
+# or: make brief
+```
+
+Produces a short morning briefing from calendar + memory (also landable in the outbox).
+
+### 🖥️ Dashboard SPA
+
+Teaching UI that makes each pillar visible: Overview, Gateway, Loop, Memory, Tools, Database,
+Ops, Compare, Settings — plus a live chat dock with streaming tokens and gate/tool stages.
+
+```bash
+# terminal 1
+cd backend && uv run yar dashboard    # API :7777
+
+# terminal 2
+cd frontend && pnpm dev               # Vite SPA
+```
+
+### 🏁 Compare arena & release gate
+
+Race OpenAI model ids against each other on the Compare page, or ship only after:
+
+```bash
+cd backend && make gate   # deterministic must pass; judge runs with a key
+```
+
+---
+
+## 🧱 Stack
 
 | Layer | Choice |
 | ----- | ------ |
@@ -39,7 +223,9 @@ normalize/tokenize module, letter and digit folding, a bilingual clock line, RTL
 eval cases in the release gate — are specified in
 [ARCHITECTURE §7](docs/ARCHITECTURE.md#7-language-support-persian-and-english).
 
-## Repo layout
+---
+
+## 📁 Repo layout
 
 ```
 yar-agent/
@@ -67,7 +253,9 @@ yar-agent/
 
 Runtime state lives in a gitignored `.yar/` directory (SQLite, calendar, traces, outbox).
 
-## Prerequisites
+---
+
+## ✅ Prerequisites
 
 | Tool | Version | Used for | Install |
 | ---- | ------- | -------- | ------- |
@@ -78,9 +266,11 @@ Runtime state lives in a gitignored `.yar/` directory (SQLite, calendar, traces,
 
 You also need an **`OPENAI_API_KEY`**. OpenAI is the only supported provider.
 
-## Running locally
+---
 
-### Backend
+## 🚀 Running locally
+
+### 🐍 Backend
 
 ```bash
 cd backend
@@ -93,7 +283,7 @@ uv run yar dashboard                 # API on http://127.0.0.1:7777
 make gate                            # deterministic evals must pass before shipping
 ```
 
-### Frontend
+### ⚡ Frontend
 
 ```bash
 cd frontend
@@ -104,7 +294,21 @@ pnpm dev                             # Vite dev server; points at VITE_API_BASE_
 Set `VITE_API_BASE_URL=` (empty = Vite proxy to `:7777`) or an absolute loopback URL (see `frontend/.env.example`).
 Restart the backend after Python changes; the Vite SPA hot-reloads UI edits.
 
-## Where to go next
+### 📋 Quick CLI cheatsheet
+
+| Command | What it does |
+| ------- | ------------ |
+| `uv run yar` | Chat in the terminal |
+| `uv run yar dashboard` | Start the API for the SPA (`:7777`) |
+| `uv run yar brief` | Morning briefing |
+| `uv run yar skill install <url>` | Install a procedural skill |
+| `make gate` | Release gate (deterministic + optional judge) |
+| `make eval` / `make eval-judge` | Run each eval suite alone |
+| `make trace` | Optional Phoenix UI on `:6006` (needs tracing extra) |
+
+---
+
+## 📚 Where to go next
 
 - **[docs/](docs/README.md)** — spec index and reading order; start here to build.
 - **[AGENTS.md](AGENTS.md)** — rules for coding agents (also [`backend/AGENTS.md`](backend/AGENTS.md),
@@ -114,7 +318,9 @@ Restart the backend after Python changes; the Vite SPA hot-reloads UI edits.
 - **[docs/api.md](docs/api.md)** — full `/api/*` route + payload contracts for the SPA.
 - **[docs/frontend.md](docs/frontend.md)** — Vite + React SPA structure and conventions.
 
-## Reference implementation
+---
+
+## 🔗 Reference implementation
 
 These docs describe the **Yar target layout** (`backend/` + `frontend/`, package `yar`,
 `uv` + `pnpm`). Behavior and contracts are reverse-engineered from the working Waku source;

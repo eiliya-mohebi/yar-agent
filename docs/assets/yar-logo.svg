@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-labelledby="title desc">
+  <title id="title">Yar</title>
+  <desc id="desc">Yar  companion, helper. Local-first personal assistant.</desc>
+
+  <!-- Mark: rounded tile matching favicon accent -->
+  <rect x="8" y="18" width="84" height="84" rx="18" fill="#5e6ad2"/>
+  <text
+    x="50"
+    y="76"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="48"
+    font-weight="700"
+  >Y</text>
+
+  <!-- Wordmark -->
+  <text
+    x="112"
+    y="62"
+    fill="#21201d"
+    font-family="system-ui, -apple-system, Segoe UI, Tahoma, Iranian Sans, Vazirmatn, sans-serif"
+    font-size="42"
+    font-weight="700"
+    letter-spacing="-0.5"
+  >Yar</text>
+  <text
+    x="210"
+    y="62"
+    fill="#5e6ad2"
+    font-family="Tahoma, Iranian Sans, Vazirmatn, system-ui, sans-serif"
+    font-size="36"
+    font-weight="700"
+  >Ì'1</text>
+
+  <!-- Tagline -->
+  <text
+    x="112"
+    y="92"
+    fill="#6f6e69"
+    font-family="system-ui, -apple-system, Segoe UI, Tahoma, sans-serif"
+    font-size="16"
+    font-weight="500"
+  >companion · GE1'G</text>
+</svg>
