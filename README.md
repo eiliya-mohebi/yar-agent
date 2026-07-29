@@ -101,7 +101,7 @@ pnpm install
 pnpm dev                             # Vite dev server; points at VITE_API_BASE_URL
 ```
 
-Set `VITE_API_BASE_URL=http://127.0.0.1:7777` (see `frontend/.env.example` once created).
+Set `VITE_API_BASE_URL=` (empty = Vite proxy to `:7777`) or an absolute loopback URL (see `frontend/.env.example`).
 Restart the backend after Python changes; the Vite SPA hot-reloads UI edits.
 
 ## Where to go next

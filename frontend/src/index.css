@@ -1,0 +1,237 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Design tokens lifted from waku `ops/static/style.css`.
+  Mapped into shadcn/Tailwind theme vars so primitives stay consistent.
+*/
+:root {
+  --bg: #fafaf9;
+  --panel: #ffffff;
+  --line: #e7e6e4;
+  --line2: #d9d8d5;
+  --ink: #21201d;
+  --ink2: #6f6e69;
+  --ink3: #a3a29d;
+  --accent: #5e6ad2;
+  --accent-soft: #eef0fb;
+  --good: #1f7a4d;
+  --good-soft: #e8f4ee;
+  --bad: #c0392b;
+  --bad-soft: #faeceb;
+  --warn: #c8951f;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Tahoma, "Iranian Sans", "Vazirmatn",
+    sans-serif;
+  --nav-w: 208px;
+  --dock-w: 380px;
+
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--panel);
+  --card-foreground: var(--ink);
+  --popover: var(--panel);
+  --popover-foreground: var(--ink);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--accent-soft);
+  --secondary-foreground: var(--accent);
+  --muted: var(--bg);
+  --muted-foreground: var(--ink2);
+  --accent-color: var(--accent-soft);
+  --accent-foreground: var(--accent);
+  --destructive: var(--bad);
+  --border: var(--line);
+  --input: var(--line2);
+  --ring: var(--accent);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101012;
+    --panel: #18181b;
+    --line: #26262a;
+    --line2: #333338;
+    --ink: #ececea;
+    --ink2: #96959f;
+    --ink3: #5f5e66;
+    --accent: #7c8aec;
+    --accent-soft: #20223a;
+    --good: #4cc38a;
+    --good-soft: #12291d;
+    --bad: #e5655a;
+    --bad-soft: #331714;
+    --primary-foreground: #101012;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent-color);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-line2: var(--line2);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-ink3: var(--ink3);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--mono);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px / 1.55 var(--font-sans);
+    @apply antialiased;
+  }
+
+  #root {
+    height: 100vh;
+  }
+
+  code,
+  .font-mono {
+    font-family: var(--mono);
+  }
+}
+
+/* Markdown in chat / turn cards (waku `.r` classes) */
+.md-body .mdp,
+.md-body .mdh,
+.md-body .mdlist,
+.md-body .mdtable {
+  white-space: normal;
+}
+.md-body .mdp {
+  margin: 0 0 8px;
+}
+.md-body .mdp:last-child {
+  margin-bottom: 0;
+}
+.md-body .mdh {
+  font-weight: 650;
+  color: var(--ink);
+  margin: 10px 0 4px;
+}
+.md-body .mdlist {
+  margin: 4px 0 8px;
+  padding-inline-start: 20px;
+}
+.md-body .mdlist li {
+  margin: 2px 0;
+}
+.md-body strong {
+  font-weight: 650;
+  color: var(--ink);
+}
+.md-body a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.md-body .mdtable {
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 12.5px;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+.md-body .mdtable th,
+.md-body .mdtable td {
+  border: 1px solid var(--line2);
+  padding: 5px 8px;
+  text-align: start;
+  white-space: nowrap;
+}
+.md-body .mdtable th {
+  background: var(--bg);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes blink-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  margin-inline-start: 2px;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: blink-caret 1s step-start infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
+}
+
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+body.no-tele .tele {
+  display: none;
+}
