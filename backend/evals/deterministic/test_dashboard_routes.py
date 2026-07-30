@@ -185,6 +185,39 @@ def test_memory_soul_fact_episode_skill(server, dash_home):
     assert skill.exists()
     assert "چای" in skill.read_text(encoding="utf-8")
 
+    # SPA path+content save of a built-in must land in .yar/skills, not the repo.
+    from yar.memory import REPO_SKILLS
+
+    builtin = REPO_SKILLS / "schedule-meeting" / "SKILL.md"
+    before = builtin.read_text(encoding="utf-8")
+    override = (
+        "---\nname: schedule-meeting\n"
+        "description: when scheduling meetings جلسه\n"
+        "---\n\nPrefer mornings.\n"
+    )
+    _, _, out = _json(
+        host,
+        port,
+        "POST",
+        "/api/memory",
+        {"action": "save_skill", "path": str(builtin), "content": override},
+    )
+    assert out.get("ok") is True
+    home_skill = dash_home / "skills" / "schedule-meeting" / "SKILL.md"
+    assert home_skill.exists()
+    assert "Prefer mornings" in home_skill.read_text(encoding="utf-8")
+    assert builtin.read_text(encoding="utf-8") == before
+
+    # /api/data always advertises the .yar/skills save path (even for built-ins).
+    _, _, data = _json(host, port, "GET", "/api/data")
+    brief = next(s for s in data["skills"] if s["name"] == "weekly-brief")
+    assert brief["rel"] == "skills/weekly-brief/SKILL.md"
+    assert brief["path"].endswith("/skills/weekly-brief/SKILL.md")
+    assert "/backend/skills/" not in brief["path"].replace("\\", "/")
+    saved = next(s for s in data["skills"] if s["name"] == "schedule-meeting")
+    assert saved["editable"] is True
+    assert saved["rel"] == "skills/schedule-meeting/SKILL.md"
+
     _, _, out = _json(
         host, port, "POST", "/api/memory", {"action": "delete_fact", "id": fid}
     )

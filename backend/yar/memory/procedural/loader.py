@@ -72,14 +72,16 @@ class SkillLoader:
         return tuple(sig)
 
     def refresh(self) -> None:
-        self.skills = []
+        # Later dirs win on name (repo built-ins first, then .yar/skills overrides).
+        by_name: dict[str, Skill] = {}
         for d in self.dirs:
             if not d.is_dir():
                 continue
             for f in sorted(d.rglob("SKILL.md")):
                 skill = _parse(f)
                 if skill:
-                    self.skills.append(skill)
+                    by_name[skill.name] = skill
+        self.skills = list(by_name.values())
         self._sig = self._scan_sig()
 
     def match(self, message: str, max_skills: int = 2) -> list[Skill]:

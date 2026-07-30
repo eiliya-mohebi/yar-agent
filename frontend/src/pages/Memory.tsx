@@ -193,12 +193,17 @@ function SkillEditor({
   }, [fullDefault, dirty])
 
   const save = async () => {
-    const r = await api.memory({ action: 'save_skill', path: skill.path, content })
-    setMsg(r.error ? `${t.error}: ${r.error}` : t.savedLive)
-    if (!r.error) {
-      setDirty(false)
-      clearEditing()
-      await onRefresh?.()
+    setMsg('')
+    try {
+      const r = await api.memory({ action: 'save_skill', path: skill.path, content })
+      setMsg(r.error ? `${t.error}: ${r.error}` : t.savedLive)
+      if (!r.error) {
+        setDirty(false)
+        clearEditing()
+        await onRefresh?.()
+      }
+    } catch (err) {
+      setMsg(`${t.error}: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
 
@@ -235,11 +240,16 @@ function SkillEditor({
         }}
       />
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <Button type="button" size="sm" disabled={!dirty} onClick={() => void save()}>
+        <Button
+          type="button"
+          size="sm"
+          disabled={skill.editable ? !dirty : false}
+          onClick={() => void save()}
+        >
           {t.saveSkill}
         </Button>
         <span className="text-[11.5px] text-[var(--ink3)]" dir="ltr">
-          {skill.rel}
+          {skill.rel || `skills/${skill.name}/SKILL.md`}
         </span>
         {msg ? (
           <span className="text-[11.5px] text-[var(--ink2)]" dir="auto">
@@ -439,7 +449,7 @@ export function MemoryPage({ data, agoSec, error, onRefresh }: Props) {
         <p className="mb-3 text-[12.5px] text-[var(--ink2)]">{t.skillsIntro}</p>
         {data.skills.length ? (
           data.skills.map((sk, i) => (
-            <SkillEditor key={sk.path} skill={sk} index={i} onRefresh={refresh} />
+            <SkillEditor key={sk.name} skill={sk} index={i} onRefresh={refresh} />
           ))
         ) : (
           <div className="rounded-lg border border-[var(--line)] bg-[var(--panel)] px-4 py-3.5 text-[var(--ink3)]">

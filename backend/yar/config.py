@@ -82,6 +82,7 @@ class Settings:
         self.home.mkdir(parents=True, exist_ok=True)
         (self.home / "traces").mkdir(exist_ok=True)
         (self.home / "outbox").mkdir(exist_ok=True)
+        (self.home / "skills").mkdir(exist_ok=True)
         return self.home
 
     def require_api_key(self) -> None:

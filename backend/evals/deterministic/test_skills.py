@@ -35,6 +35,19 @@ def test_loader_parses_valid_skill_and_skips_invalid(tmp_path):
     assert [s.name for s in loader.skills] == ["ok"]
 
 
+def test_home_skill_overrides_repo_skill_by_name(tmp_path):
+    """Later dirs win — .yar/skills overrides a packaged built-in of the same name."""
+    repo = tmp_path / "repo"
+    home = tmp_path / "home"
+    _write_skill(repo, "schedule-meeting", "repo trigger words meeting", "repo body")
+    _write_skill(home, "schedule-meeting", "home trigger words meeting", "home body")
+
+    loader = SkillLoader([repo, home])
+    assert len(loader.skills) == 1
+    assert loader.skills[0].body == "home body"
+    assert "home" in str(loader.skills[0].path)
+
+
 def test_english_schedule_message_matches_skill(tmp_path):
     _write_skill(
         tmp_path,

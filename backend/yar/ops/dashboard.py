@@ -730,20 +730,27 @@ def memory_action(payload: dict) -> dict:
         return {"ok": True}
     if action == "save_skill":
         # SPA edits by path+content (frontend.md); api.md also allows name/description/body.
+        # Writes always land in .yar/skills/ — never mutate packaged built-ins.
         path_raw = payload.get("path")
         content = (payload.get("content") or "").strip()
         if path_raw:
             from yar.memory import REPO_SKILLS
             from yar.memory.procedural.loader import _parse_text
 
-            dest = Path(path_raw).resolve()
-            allowed = [REPO_SKILLS.resolve(), (settings.home / "skills").resolve()]
-            if dest.name != "SKILL.md" or not any(a in dest.parents for a in allowed):
+            requested = Path(path_raw).resolve()
+            home_skills = (settings.home / "skills").resolve()
+            allowed = [REPO_SKILLS.resolve(), home_skills]
+            if requested.name != "SKILL.md" or not any(
+                a in requested.parents for a in allowed
+            ):
                 return {"error": "can only edit SKILL.md files inside the skills folders"}
-            if _parse_text(content, dest) is None:
+            if _parse_text(content, requested) is None:
                 return {
                     "error": "invalid SKILL.md — needs a name and description in the frontmatter"
                 }
+            # Built-in path → home override; home path stays put. Parent folder = slug.
+            dest = home_skills / requested.parent.name / "SKILL.md"
+            dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_text(content.rstrip() + "\n", encoding="utf-8")
             return {"ok": True}
         name = (payload.get("name") or "").strip().lower().replace(" ", "-")
@@ -1163,17 +1170,23 @@ def collect() -> dict:
     from yar.memory import REPO_SKILLS
     from yar.memory.procedural.loader import SkillLoader
 
-    skills = [
-        {
-            "name": s.name,
-            "description": s.description,
-            "body": s.body,
-            "path": str(s.path),
-            "rel": _rel_to_home(s.path, home),
-            "editable": str((home / "skills").resolve()) in str(s.path.resolve()),
-        }
-        for s in SkillLoader([REPO_SKILLS, home / "skills"]).skills
-    ]
+    # SPA Save always writes under .yar/skills — advertise that absolute path even
+    # for built-ins (body still comes from whichever copy is loaded).
+    home_skills = (home / "skills").resolve()
+    skills = []
+    for s in SkillLoader([REPO_SKILLS, home / "skills"]).skills:
+        slug = s.path.parent.name
+        dest = home_skills / slug / "SKILL.md"
+        skills.append(
+            {
+                "name": s.name,
+                "description": s.description,
+                "body": s.body,
+                "path": str(dest),
+                "rel": f"skills/{slug}/SKILL.md",
+                "editable": home_skills in s.path.resolve().parents,
+            }
+        )
 
     eval_report = None
     report_path = home / "eval_report.json"
