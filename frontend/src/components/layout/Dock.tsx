@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -70,28 +71,38 @@ export function Dock({
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="inline-flex h-7 items-center justify-center rounded-lg border border-border bg-background px-2.5 text-[0.8rem] font-medium hover:bg-muted"
+            render={
+              <Button type="button" variant="outline" size="sm" />
+            }
           >
             {t.history}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-80 w-[300px] overflow-y-auto">
-            <DropdownMenuLabel>{t.history}</DropdownMenuLabel>
-            <DropdownMenuItem onClick={onViewAll}>{t.allMessages}</DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{t.history}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => void onViewAll()}>{t.allMessages}</DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            {(data?.sessions || []).map((s) => (
-              <DropdownMenuItem
-                key={s.id}
-                onClick={() => void onSwitchSession(s.id)}
-                className="flex flex-col items-stretch gap-0.5"
-              >
-                <span className="truncate" dir="auto">
-                  {s.title || s.id}
-                </span>
-                <span className="font-mono text-[10px] text-[var(--ink3)]" dir="ltr">
-                  {s.messages ?? 0} · {s.last_at || ''}
-                </span>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              {(data?.sessions || []).length ? (
+                (data?.sessions || []).map((s) => (
+                  <DropdownMenuItem
+                    key={s.id}
+                    onClick={() => void onSwitchSession(s.id)}
+                    className="flex flex-col items-stretch gap-0.5"
+                  >
+                    <span className="truncate" dir="auto">
+                      {s.title || s.id}
+                    </span>
+                    <span className="font-mono text-[10px] text-[var(--ink3)]" dir="ltr">
+                      {s.messages ?? 0} · {s.last_at || ''}
+                    </span>
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <DropdownMenuItem disabled>no past conversations yet</DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button

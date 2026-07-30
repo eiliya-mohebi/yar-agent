@@ -191,31 +191,40 @@ export function useChatStream(
 
   const switchSession = useCallback(
     async (id: string) => {
-      await loadThread(id, 'switch', { setSession: true })
-      onDoneRef.current()
+      try {
+        await loadThread(id, 'switch', { setSession: true })
+        onDoneRef.current()
+      } catch {
+        // leave the current transcript if switch fails
+      }
     },
     [loadThread],
   )
 
-  const viewAllHistory = useCallback(() => {
-    if (!data) return
-    const rows: ChatMessage[] = []
-    for (const m of data.chat_log || []) {
-      let meta: ChatMeta | null = null
-      if (typeof m.meta === 'string' && m.meta) {
-        try {
-          meta = JSON.parse(m.meta) as ChatMeta
-        } catch {
-          meta = null
+  const viewAllHistory = useCallback(async () => {
+    try {
+      await loadThread('__all__', 'history', { setSession: true })
+    } catch {
+      // fall back to the snapshot already in /api/data
+      if (!data) return
+      const rows: ChatMessage[] = []
+      for (const m of data.chat_log || []) {
+        let meta: ChatMeta | null = null
+        if (typeof m.meta === 'string' && m.meta) {
+          try {
+            meta = JSON.parse(m.meta) as ChatMeta
+          } catch {
+            meta = null
+          }
+        } else if (m.meta && typeof m.meta === 'object') {
+          meta = m.meta
         }
-      } else if (m.meta && typeof m.meta === 'object') {
-        meta = m.meta
+        rows.push(histItem({ role: m.role, content: m.content, meta }))
       }
-      rows.push(histItem({ role: m.role, content: m.content, meta }))
+      setMessages(rows)
+      setSessionId('__all__')
     }
-    setMessages(rows)
-    setSessionId('__all__')
-  }, [data])
+  }, [data, loadThread])
 
   const send = useCallback(
     async (text: string) => {

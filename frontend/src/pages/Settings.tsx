@@ -43,7 +43,7 @@ function PinStar({
 }
 
 export function SettingsPage({ data, agoSec, error, onRefresh }: Props) {
-  const { t, toggleLang } = useLang()
+  const { t } = useLang()
   const { editing, markEditing, clearEditing } = useEditing()
 
   const [model, setModel] = useState('')
@@ -347,9 +347,6 @@ export function SettingsPage({ data, agoSec, error, onRefresh }: Props) {
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <Button type="submit" size="sm">
             {t.save}
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={toggleLang}>
-            {t.langToggle}
           </Button>
           {msg ? (
             <span className="text-[12.5px] text-[var(--ink2)]" dir="auto">

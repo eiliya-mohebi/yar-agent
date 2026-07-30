@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
 import { CollapseStart } from '@/components/layout/Chevrons'
 import { useLang } from '@/hooks/useLang'
 import type { DashboardData } from '@/lib/types'
@@ -26,7 +25,7 @@ type NavItem = {
 }
 
 export function Nav({ data, onCollapse }: Props) {
-  const { t, toggleLang } = useLang()
+  const { t } = useLang()
   const s = data?.stats
   const items: NavItem[] = [
     { to: '/overview', labelKey: 'overview' },
@@ -125,18 +124,6 @@ export function Nav({ data, onCollapse }: Props) {
           ) : null}
         </NavLink>
       ))}
-
-      <div className="mt-auto px-1 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={toggleLang}
-        >
-          {t.langToggle}
-        </Button>
-      </div>
     </nav>
   )
 }

@@ -326,10 +326,19 @@ def session_list(conn) -> list[dict]:
 
 
 def _thread_history(conn, sid: str) -> list[dict]:
-    rows = conn.execute(
-        "SELECT role, content, meta FROM chat_log WHERE session_id=? ORDER BY id",
-        (sid,),
-    ).fetchall()
+    """Load a thread for the chat dock: role + content + per-turn meta.
+
+    id ``__all__`` returns the cross-thread timeline (newest last, capped).
+    """
+    if sid == "__all__":
+        rows = conn.execute(
+            "SELECT role, content, meta FROM chat_log ORDER BY id DESC LIMIT 200"
+        ).fetchall()[::-1]
+    else:
+        rows = conn.execute(
+            "SELECT role, content, meta FROM chat_log WHERE session_id=? ORDER BY id",
+            (sid,),
+        ).fetchall()
     return [
         {
             "role": r["role"],
@@ -341,9 +350,9 @@ def _thread_history(conn, sid: str) -> list[dict]:
 
 
 def session_action(payload: dict) -> dict:
-    """new / switch / history — body uses session_id per api.md."""
+    """new / switch / history — body uses session_id per api.md (also accept id)."""
     action = payload.get("action")
-    sid = payload.get("session_id") or "default"
+    sid = payload.get("session_id") or payload.get("id") or "default"
     if action == "history":
         settings = load_settings()
         settings.ensure_home()

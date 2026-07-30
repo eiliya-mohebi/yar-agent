@@ -157,6 +157,17 @@ def test_session_new_switch_history(server, dash_home):
     assert switched["session_id"] == "past-1"
     assert len(switched["history"]) >= 2
 
+    # Cross-thread timeline (dock "All messages") + legacy `id` field.
+    status, _, body = _post(
+        host, port, "/api/session", {"action": "history", "id": "__all__"}
+    )
+    assert status == 200
+    all_hist = json.loads(body)
+    assert all_hist["ok"] is True
+    assert all_hist["session_id"] == "__all__"
+    assert len(all_hist["history"]) >= 2
+    assert any(m["role"] == "user" and "سلام" in m["content"] for m in all_hist["history"])
+
 
 def _scripted_agent(home, client):
     """Dashboard HTTP workers are other threads — need check_same_thread=False."""
