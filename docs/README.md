@@ -1,12 +1,13 @@
 # yar-agent — specs
 
-Three documents describe the system. Read them in this order; each assumes the one before it.
+Documents that describe the system. Read them in this order; each assumes the ones before it.
 
 | # | Doc | Answers | Read it when |
 |---|-----|---------|--------------|
 | 1 | **[ARCHITECTURE.md](ARCHITECTURE.md)** | How the whole thing works — the four pillars, the loop, memory, language support, evals, and what's deliberately out of scope. | Always first. It's the only doc that explains *why*. |
 | 2 | **[api.md](api.md)** | The `/api/*` route and payload contract the backend serves on `:7777`. | Building either side of the client/server line. |
 | 3 | **[frontend.md](frontend.md)** | The dashboard SPA — shell layout, pages, chat dock, RTL rules, rebuild order. | Building the UI. |
+| 4 | **[voice.md](voice.md)** | CLI push-to-talk voice gateway — local STT/TTS, fa+en, packaging, evals. | Implementing or reviewing voice; §13 still lists it as cut until built. |
 
 Rules for *how to write the code* live outside this folder, in the AGENTS files:
 [`../AGENTS.md`](../AGENTS.md) (universal), [`../backend/AGENTS.md`](../backend/AGENTS.md),
@@ -23,6 +24,7 @@ Rules for *how to write the code* live outside this folder, in the AGENTS files:
 | Add or change memory behavior | [ARCHITECTURE §6](ARCHITECTURE.md#6-memory), plus [§7](ARCHITECTURE.md#7-language-support-persian-and-english) — every search path is bilingual |
 | Add an endpoint | [api.md](api.md) (update it in the same change), then [frontend.md §5](frontend.md#5-dashboarddata-get-apidata) |
 | Understand a cut feature | [ARCHITECTURE §13](ARCHITECTURE.md#13-deliberately-out-of-scope) — each cut names the seam it would reattach at |
+| Implement the CLI voice gateway | [voice.md](voice.md) (full contract) → Waku `gateway/voice.py` for literals to adapt; update §13 when shipping |
 
 ## Two things to know before you start
 
