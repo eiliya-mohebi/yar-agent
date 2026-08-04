@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reference — Memory | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/memory.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="../lessons/0004-memory.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Reference · Memory</span>
+      <span class="brand-sub lang-fa">مرجع · حافظه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta"><span class="pill">Reference</span></div>
+
+    <h1 class="lang-en">Memory — cheat sheet</h1>
+    <h1 class="lang-fa">حافظه — برگهٔ تقلب</h1>
+
+    <p class="lede lang-en">
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §6</a> ·
+      <code>yar/memory/</code> · one SQLite file, no embeddings on the default path.
+    </p>
+    <p class="lede lang-fa">
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §۶</a> · یک فایل SQLite، بدون embedding در مسیر پیش‌فرض.
+    </p>
+
+    <h2 class="lang-en">Three durable types</h2>
+    <h2 class="lang-fa">سه نوع پایدار</h2>
+    <ul>
+      <li>
+        <span class="lang-en"><strong>Semantic</strong> — facts (FTS5/BM25) · <code>semantic/store.py</code></span>
+        <span class="lang-fa"><strong>معنایی</strong> — حقایق (FTS5) · <code>semantic/store.py</code></span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>Episodic</strong> — dated summaries · <code>episodic/store.py</code></span>
+        <span class="lang-fa"><strong>اپیزودیک</strong> — خلاصه‌های تاریخ‌دار · <code>episodic/store.py</code></span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>Procedural</strong> — SKILL.md on disk · overlap ≥ 2, top 2</span>
+        <span class="lang-fa"><strong>رویه‌ای</strong> — SKILL.md روی دیسک · هم‌پوشانی ≥ ۲، حداکثر ۲ مهارت</span>
+      </li>
+    </ul>
+
+    <h2 class="lang-en">Two heroes</h2>
+    <h2 class="lang-fa">دو قهرمان</h2>
+    <ul>
+      <li>
+        <span class="lang-en"><strong>Retrieval gate</strong> — cheap model: retrieve? + query. <em>Fails open</em>.</span>
+        <span class="lang-fa"><strong>دروازهٔ بازیابی</strong> — مدل ارزان: بازیابی؟ + کوئری. <em>شکستِ باز</em>.</span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>Consolidation</strong> — when unconsolidated rows ≥ <code>every * 2</code>, distill facts + one episode. <em>Loss-safe</em>.</span>
+        <span class="lang-fa"><strong>تجمیع</strong> — وقتی ردیف‌های تجمیع‌نشده ≥ <code>every * 2</code>، حقایق + یک اپیزود. <em>ایمن در برابر ازدست‌رفتن</em>.</span>
+      </li>
+    </ul>
+
+    <h2 class="lang-en">Working vs durable</h2>
+    <h2 class="lang-fa">کاری در برابر پایدار</h2>
+    <p class="lang-en">
+      Working memory = this turn’s prompt window (Session). Durable memory = facts/episodes/skills
+      that survive across turns. Industry parallel: session context vs long-term memory
+      (<a href="https://developers.openai.com/cookbook/examples/agents_sdk/building_reliable_agents_memory_compaction">OpenAI memory &amp; compaction</a>).
+    </p>
+    <p class="lang-fa">
+      حافظهٔ کاری = پنجرهٔ پرامپت این نوبت. حافظهٔ پایدار = حقایق/اپیزودها/مهارت‌ها.
+    </p>
+
+    <h2 class="lang-en">Bilingual rule</h2>
+    <h2 class="lang-fa">قانون دوزبانه</h2>
+    <p class="lang-en">
+      Tokenize only via <code>yar/text.py</code>. ASCII character classes silently zero Persian —
+      skills never match, FTS returns empty (<a href="../docs/ARCHITECTURE.md">§7</a>).
+    </p>
+    <p class="lang-fa">
+      فقط از <code>yar/text.py</code> توکنایز کنید. کلاس کاراکتر ASCII فارسی را خاموش خالی می‌کند (§۷).
+    </p>
+
+    <nav class="nav-links">
+      <a href="../lessons/0004-memory.html">
+        <span class="lang-en">Lesson 0004</span>
+        <span class="lang-fa">درس ۰۰۰۴</span>
+      </a>
+      <a href="./four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Yar curriculum reference</span>
+    <span class="lang-fa">مرجع دورهٔ یار</span>
+  </footer>
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>

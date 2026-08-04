@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0001 — The Four Pillars | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Lesson 0001 · Four pillars</span>
+      <span class="brand-sub lang-fa">درس ۰۰۰۱ · چهار ستون</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Lesson 0001</span>
+      <span class="lang-en">~12 minutes · one map you will reuse</span>
+      <span class="lang-fa">حدود ۱۲ دقیقه · یک نقشه که دوباره به کارتان می‌آید</span>
+    </div>
+
+    <h1 class="lang-en">Every serious agent has four pillars</h1>
+    <h1 class="lang-fa">هر عامل جدی چهار ستون دارد</h1>
+
+    <p class="lede lang-en">
+      You already know chat completions and tool calling. This lesson names the four parts that
+      turn a model call into an <em>agent system</em> — and shows where each lives in
+      <strong>Yar</strong>, a local-first teaching implementation.
+    </p>
+    <p class="lede lang-fa">
+      شما chat completions و tool calling را می‌شناسید. این درس چهار بخشی را نام می‌برد که یک
+      فراخوانی مدل را به <em>سامانهٔ عامل</em> تبدیل می‌کنند — و نشان می‌دهد هر کدام در
+      <strong>یار</strong> کجا زندگی می‌کند.
+    </p>
+
+    <!-- Knowledge -->
+    <h2 class="lang-en">What “agent” means here</h2>
+    <h2 class="lang-fa">اینجا «عامل» یعنی چه</h2>
+
+    <p class="lang-en">
+      Anthropic’s practical definition: agents are systems where an LLM
+      <strong>dynamically</strong> directs tool use from environmental feedback in a loop —
+      not only a fixed workflow hardcoded in advance.
+      (<a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>,
+      Dec 2024.)
+    </p>
+    <p class="lang-fa">
+      تعریف کاربردی Anthropic: عامل سامانه‌ای است که مدل با بازخورد محیط، استفاده از ابزار را
+      <strong>پویا</strong> در یک حلقه هدایت می‌کند — نه فقط یک گردش‌کار ازپیش‌ثابت.
+      (<a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>)
+    </p>
+
+    <p class="lang-en">
+      Yar’s teaching lens splits that system into four pillars so each stays legible on its own
+      (<a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a>):
+    </p>
+    <p class="lang-fa">
+      لنز آموزشی یار همان سامانه را به چهار ستون می‌شکند تا هر کدام به‌تنهایی خوانا بماند
+      (<a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a>):
+    </p>
+
+    <figure class="figure" aria-label="Four pillars">
+      <div class="pillars">
+        <div class="pillar" data-pillar="harness" role="button" tabindex="0">
+          <p class="pillar-name">Harness</p>
+          <p class="lang-en">Move text in / out. No reasoning.</p>
+          <p class="lang-fa">متن را وارد و خارج کن. استدلال نکن.</p>
+          <p class="pillar-path">yar/gateway/ + SPA</p>
+        </div>
+        <div class="pillar" data-pillar="loop" role="button" tabindex="0">
+          <p class="pillar-name">Loop</p>
+          <p class="lang-en">Reason → act → observe until done.</p>
+          <p class="lang-fa">استدلال ← عمل ← مشاهده تا پایان.</p>
+          <p class="pillar-path">yar/loop/agent.py</p>
+        </div>
+        <div class="pillar" data-pillar="memory" role="button" tabindex="0">
+          <p class="pillar-name">Memory</p>
+          <p class="lang-en">Durable facts, episodes, skills.</p>
+          <p class="lang-fa">حقایق، اپیزودها، مهارت‌های پایدار.</p>
+          <p class="pillar-path">yar/memory/ + db.py</p>
+        </div>
+        <div class="pillar" data-pillar="eval" role="button" tabindex="0">
+          <p class="pillar-name">Eval / Ops</p>
+          <p class="lang-en">Trace, score, gate releases.</p>
+          <p class="lang-fa">ردیابی، امتیاز، دروازهٔ انتشار.</p>
+          <p class="pillar-path">yar/ops/ + evals/</p>
+        </div>
+      </div>
+
+      <div class="pillar-detail is-open" data-pillar-detail="harness">
+        <p class="lang-en">
+          <strong>Harness / Gateway</strong> is the I/O boundary: CLI prompts, HTTP routes, SSE
+          streams. If it starts “thinking,” you’ve muddied the pillar. Yar’s default gateways are
+          the CLI and the Vite SPA → stdlib API on <code>:7777</code>.
+        </p>
+        <p class="lang-fa">
+          <strong>درگاه</strong> مرز ورودی/خروجی است: پرامپت CLI، مسیرهای HTTP، استریم SSE.
+          اگر شروع به «فکر کردن» کرد، ستون را گل‌آلود کرده‌اید.
+        </p>
+      </div>
+      <div class="pillar-detail" data-pillar-detail="loop">
+        <p class="lang-en">
+          <strong>Loop</strong> is the whole trick: call the model with tools; if it requests tools,
+          execute them and append results; stop when it replies or hits max iterations.
+          Anthropic: agents are “typically just LLMs using tools based on environmental feedback
+          in a loop.” Yar keeps that loop ~95 lines on purpose.
+        </p>
+        <p class="lang-fa">
+          <strong>حلقه</strong> کل ترفند است: مدل را با ابزار صدا بزن؛ اگر ابزار خواست اجرا کن و
+          نتیجه را برگردان؛ وقتی پاسخ داد یا به سقف تکرار رسید، بایست.
+        </p>
+      </div>
+      <div class="pillar-detail" data-pillar-detail="memory">
+        <p class="lang-en">
+          <strong>Memory</strong> is durable state: semantic (FTS5 facts), episodic (dated events),
+          procedural (SKILL.md), plus a retrieval gate so you don’t dump the whole DB into every
+          prompt. OpenAI’s reliability notes separate short-term session context from durable
+          memory — Yar makes that split explicit in code.
+        </p>
+        <p class="lang-fa">
+          <strong>حافظه</strong> حالت پایدار است: معنایی، اپیزودیک، رویه‌ای، به‌همراه دروازهٔ
+          بازیابی تا کل دیتابیس وارد هر پرامپت نشود.
+        </p>
+      </div>
+      <div class="pillar-detail" data-pillar-detail="eval">
+        <p class="lang-en">
+          <strong>Eval / LLM-Ops</strong> is how you know changes help: JSONL traces, deterministic
+          “did the right tool fire?” checks, and separate judge scores for quality. Industry eval
+          platforms draw the same line between code/heuristic checks and LLM-as-judge
+          (<a href="https://docs.langchain.com/langsmith/evaluation-types">LangSmith evaluation types</a>).
+          Yar’s rule: never mix the two suites.
+        </p>
+        <p class="lang-fa">
+          <strong>ارزیابی / عملیات</strong> یعنی بدانید تغییر کمکتان کرده: ردیابی، تست قطعی ابزار،
+          و امتیاز داور جداگانه. قانون یار: این دو را مخلوط نکنید.
+        </p>
+      </div>
+
+      <figcaption>
+        <span class="lang-en">Figure 1 — Click a pillar. Paths are from <code>docs/ARCHITECTURE.md</code>.</span>
+        <span class="lang-fa">شکل ۱ — روی یک ستون کلیک کنید. مسیرها از معماری یار است.</span>
+      </figcaption>
+    </figure>
+
+    <h2 class="lang-en">One turn, all four pillars</h2>
+    <h2 class="lang-fa">یک نوبت، هر چهار ستون</h2>
+
+    <p class="lang-en">
+      Assembly lives in <code>Yar.respond()</code>. Gateway delivers a string; the rest is pillars
+      cooperating:
+    </p>
+    <p class="lang-fa">
+      مونتاژ در <code>Yar.respond()</code> است. درگاه یک رشته می‌دهد؛ بقیه همکاری ستون‌هاست:
+    </p>
+
+    <figure class="figure">
+      <div class="flow" aria-hidden="false">
+        <span>Gateway</span><span class="arrow">→</span>
+        <span>Session / Memory</span><span class="arrow">→</span>
+        <span>run_loop</span><span class="arrow">→</span>
+        <span>persist + consolidate</span><span class="arrow">→</span>
+        <span>Tracer</span>
+      </div>
+      <figcaption>
+        <span class="lang-en">Figure 2 — Same flow as ARCHITECTURE.md “Assembly flow”.</span>
+        <span class="lang-fa">شکل ۲ — همان جریان مونتاژ در ARCHITECTURE.md.</span>
+      </figcaption>
+    </figure>
+
+    <p class="lang-en">Real code (abbreviated from <code>backend/yar/app.py</code>):</p>
+    <p class="lang-fa">کد واقعی (خلاصه از <code>backend/yar/app.py</code>):</p>
+
+    <pre class="code"><code><span class="c"># Gateway called respond() with a user string</span>
+system = self.session.build_system(user_message, notify=notify)
+messages = (
+    [{"role": "system", "content": system}]
+    + self.session.history[-window:]
+    + [{"role": "user", "content": user_message}]
+)
+
+result = run_loop(  <span class="c"># ← Loop pillar</span>
+    client=self.client,
+    model=self.settings.model,
+    messages=messages,
+    tools=self.tools,
+    max_iterations=self.settings.max_iterations,
+    observer=notify,
+)
+
+self.session.add_exchange(...)       <span class="c"># persist chat</span>
+self.memory.maybe_consolidate(...)   <span class="c"># ← Memory pillar</span>
+<span class="c"># Tracer wraps the turn                   ← Eval / Ops pillar</span></code></pre>
+
+    <p class="lang-en">Inside the loop (<code>backend/yar/loop/agent.py</code>), the two guardrails match industry advice on stop conditions:</p>
+    <p class="lang-fa">داخل حلقه، دو حفاظ توقف همان توصیهٔ صنعتی دربارهٔ شرط پایان است:</p>
+
+    <pre class="code"><code><span class="k">for</span> iteration <span class="k">in</span> range(1, max_iterations + 1):
+    response = completions.create(...)   <span class="c"># reason</span>
+    tool_calls = message.tool_calls <span class="k">or</span> []
+    <span class="k">if not</span> tool_calls:
+        <span class="k">return</span> reply                   <span class="c"># natural end</span>
+    <span class="k">for</span> call <span class="k">in</span> tool_calls:
+        output = tools.execute(...)      <span class="c"># act</span>
+        messages.append({..., "content": output})  <span class="c"># observe</span>
+<span class="c"># else: hit max_iterations → hard stop</span></code></pre>
+
+    <!-- Skill practice -->
+    <h2 class="lang-en">Practice: map the job to the pillar</h2>
+    <h2 class="lang-fa">تمرین: کار را به ستون وصل کنید</h2>
+
+    <p class="lang-en">Retrieval practice — answer from memory, then check. Option lengths are matched on purpose.</p>
+    <p class="lang-fa">بازیابی از حافظه — اول از یادتان پاسخ دهید. طول گزینه‌ها عمداً یکسان است.</p>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="b"
+      data-ok-en="Yes — gateways move text; the loop does the reasoning."
+      data-ok-fa="بله — درگاه متن را جابه‌جا می‌کند؛ حلقه استدلال می‌کند."
+      data-bad-en="Hint: I/O without reasoning is the harness, not the loop."
+      data-bad-fa="راهنما: ورودی/خروجی بدون استدلال همان درگاه است، نه حلقه."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">1. Which pillar owns “accept a CLI string and print the reply”?</span>
+        <span class="lang-fa">۱. کدام ستون مسئول «گرفتن رشته از CLI و چاپ پاسخ» است؟</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Loop — it calls the model each turn</span>
+          <span class="lang-fa">حلقه — هر نوبت مدل را صدا می‌زند</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Harness — it only moves text around</span>
+          <span class="lang-fa">درگاه — فقط متن را جابه‌جا می‌کند</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Memory — it stores facts in SQLite</span>
+          <span class="lang-fa">حافظه — حقایق را در SQLite نگه می‌دارد</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Eval — it scores replies after shipping</span>
+          <span class="lang-fa">ارزیابی — بعد از انتشار پاسخ را می‌سنجد</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="c"
+      data-ok-en="Right — deterministic checks are 0/1 tool assertions, separate from judges."
+      data-ok-fa="درست — تست قطعی ۰/۱ است و از داور جدا می‌ماند."
+      data-bad-en="Hint: Yar never mixes 0/1 tool checks with scored judge quality."
+      data-bad-fa="راهنما: یار تست ۰/۱ ابزار را با امتیاز داور مخلوط نمی‌کند."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">2. “Did create_event fire with the right args?” belongs to…</span>
+        <span class="lang-fa">۲. «آیا create_event با آرگومان درست اجرا شد؟» متعلق به…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Harness gateway streaming path only</span>
+          <span class="lang-fa">فقط مسیر استریم درگاه ورودی</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Judge suite scoring reply tone alone</span>
+          <span class="lang-fa">فقط سوئیت داور برای لحن پاسخ</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Deterministic eval inside Eval / Ops</span>
+          <span class="lang-fa">ارزیابی قطعی داخل ستون ارزیابی</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Procedural skill markdown frontmatter</span>
+          <span class="lang-fa">فرانت‌متر مارک‌داون مهارت رویه‌ای</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="a"
+      data-ok-en="Exactly — that while-loop is the Loop pillar’s entire job."
+      data-ok-fa="دقیق است — همان while کل کار ستون حلقه است."
+      data-bad-en="Hint: reason → act → observe is the loop, not durable storage."
+      data-bad-fa="راهنما: استدلال ← عمل ← مشاهده همان حلقه است، نه حافظهٔ پایدار."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">3. reason → act → observe until max_iterations is…</span>
+        <span class="lang-fa">۳. استدلال ← عمل ← مشاهده تا سقف تکرار همان…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">The Loop pillar in agent.py</span>
+          <span class="lang-fa">ستون حلقه در فایل agent.py</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">The Memory consolidation batch</span>
+          <span class="lang-fa">بچ تجمیع در ستون حافظه</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">The Harness REST route table</span>
+          <span class="lang-fa">جدول مسیر REST در درگاه</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">The Eval release gate script</span>
+          <span class="lang-fa">اسکریپت دروازهٔ انتشار ارزیابی</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="callout primary">
+      <h3 class="lang-en">Primary source (read next)</h3>
+      <h3 class="lang-fa">منبع اصلی (بعداً بخوانید)</h3>
+      <p class="lang-en">
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents — Anthropic</a>.
+        Focus on the “Agents” section and the three principles at the end (simplicity, transparency, tool interfaces).
+        Then skim Yar’s <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a> whiteboard and match each box to a pillar.
+      </p>
+      <p class="lang-fa">
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents — Anthropic</a>.
+        بخش Agents و سه اصل پایانی را بخوانید؛ بعد وایت‌برد
+        <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a> را با چهار ستون تطبیق دهید.
+      </p>
+    </div>
+
+    <nav class="nav-links">
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Reference: glossary</span>
+        <span class="lang-fa">مرجع: واژه‌نامه</span>
+      </a>
+      <a href="../docs/ARCHITECTURE.md">
+        <span class="lang-en">Repo: ARCHITECTURE.md</span>
+        <span class="lang-fa">ریپو: ARCHITECTURE.md</span>
+      </a>
+      <a href="../MISSION.md">MISSION.md</a>
+      <span class="lang-en">Next up: <a href="./0002-the-loop.html">0002 — The Loop</a></span>
+      <span class="lang-fa">درس بعد: <a href="./0002-the-loop.html">۰۰۰۲ — حلقه</a></span>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Citations: Anthropic (2024); Yar ARCHITECTURE.md; LangSmith evaluation types; OpenAI agents memory notes via RESOURCES.md</span>
+    <span class="lang-fa">استنادها: Anthropic (۲۰۲۴)؛ معماری یار؛ انواع ارزیابی LangSmith؛ یادداشت حافظه OpenAI در RESOURCES.md</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+  <script src="../assets/quiz.js"></script>
+  <script src="../assets/pillars.js"></script>
+</body>
+</html>

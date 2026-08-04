@@ -1,0 +1,131 @@
+/* Eval / LLM-Ops figures (lesson 0005+) */
+
+.eval-split {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .eval-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.eval-card {
+  padding: 1.05rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+}
+
+.eval-card h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 1.1rem;
+  margin: 0 0 0.4rem;
+}
+
+.eval-card .path {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin: 0.6rem 0 0;
+  word-break: break-all;
+}
+
+.eval-card.warn-edge {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+}
+
+.ops-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.ops-flow span {
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.ops-flow .arrow {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  padding: 0;
+}
+
+.ops-flow .gate-open {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+}
+
+.suite-pick {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.suite-item {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.suite-item .q {
+  font-weight: 600;
+  margin: 0 0 0.55rem;
+}
+
+.suite-item .choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.suite-item button {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.suite-item button.is-correct {
+  border-color: var(--ok);
+  background: #e6ffed;
+}
+
+.suite-item button.is-wrong {
+  border-color: var(--danger);
+  background: #ffe8e8;
+}
+
+.suite-item .fb {
+  margin-top: 0.45rem;
+  font-size: 0.88rem;
+  min-height: 1.2em;
+  color: var(--ink-muted);
+}
+
+.suite-item .fb.ok {
+  color: var(--ok);
+}
+
+.suite-item .fb.bad {
+  color: var(--danger);
+}
+
+body[data-lang="fa"] .ops-flow,
+body[data-lang="fa"] .eval-card .path {
+  direction: ltr;
+  text-align: left;
+}

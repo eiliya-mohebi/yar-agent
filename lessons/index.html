@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yar Curriculum — Lessons</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Four pillars of agents</span>
+      <span class="brand-sub lang-fa">چهار ستون عامل‌ها</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Index</span>
+      <span class="lang-en">6 lessons · LLM basics assumed</span>
+      <span class="lang-fa">۶ درس · آشنایی پایه با LLM فرض شده</span>
+    </div>
+
+    <h1 class="lang-en">Learn how serious agents are built</h1>
+    <h1 class="lang-fa">یاد بگیرید عامل جدی چگونه ساخته می‌شود</h1>
+
+    <p class="lede lang-en">
+      A bilingual HTML path through Yar’s four pillars — Harness, Loop, Memory, Eval/Ops —
+      with figures and real repo code. Open any lesson in a browser; use EN | فا to switch language.
+    </p>
+    <p class="lede lang-fa">
+      مسیر HTML دوزبانه از چهار ستون یار — درگاه، حلقه، حافظه، ارزیابی —
+      با شکل و کد واقعی ریپو. هر درس را در مرورگر باز کنید؛ با EN | فا زبان را عوض کنید.
+    </p>
+
+    <nav class="catalog" aria-label="Lessons">
+      <a href="./0001-four-pillars.html">
+        <span class="num">0001</span>
+        <div>
+          <h2 class="lang-en">Four pillars</h2>
+          <h2 class="lang-fa">چهار ستون</h2>
+          <p class="lang-en">The map: Harness, Loop, Memory, Eval/Ops — and where each lives in Yar.</p>
+          <p class="lang-fa">نقشه: درگاه، حلقه، حافظه، ارزیابی — و جای هر کدام در یار.</p>
+          <div class="meta">~12 min</div>
+        </div>
+      </a>
+
+      <a href="./0002-the-loop.html">
+        <span class="num">0002</span>
+        <div>
+          <h2 class="lang-en">The Loop</h2>
+          <h2 class="lang-fa">حلقه</h2>
+          <p class="lang-en">Reason → act → observe, two guardrails, and a step-through of one turn.</p>
+          <p class="lang-fa">استدلال ← عمل ← مشاهده، دو حفاظ، و قدم‌به‌قدم یک نوبت.</p>
+          <div class="meta">~15 min · loop/agent.py</div>
+        </div>
+      </a>
+
+      <a href="./0003-harness-gateway.html">
+        <span class="num">0003</span>
+        <div>
+          <h2 class="lang-en">Harness / Gateway</h2>
+          <h2 class="lang-fa">درگاه</h2>
+          <p class="lang-en">CLI and SPA only move text into <code>respond()</code> — they do not reason.</p>
+          <p class="lang-fa">CLI و SPA فقط متن را به <code>respond()</code> می‌رسانند — استدلال نمی‌کنند.</p>
+          <div class="meta">~12 min · gateway/cli.py</div>
+        </div>
+      </a>
+
+      <a href="./0004-memory.html">
+        <span class="num">0004</span>
+        <div>
+          <h2 class="lang-en">Memory</h2>
+          <h2 class="lang-fa">حافظه</h2>
+          <p class="lang-en">Semantic, episodic, procedural — plus the retrieval gate and consolidation.</p>
+          <p class="lang-fa">معنایی، اپیزودیک، رویه‌ای — به‌همراه دروازهٔ بازیابی و تجمیع.</p>
+          <div class="meta">~15 min · yar/memory/</div>
+        </div>
+      </a>
+
+      <a href="./0005-eval-ops.html">
+        <span class="num">0005</span>
+        <div>
+          <h2 class="lang-en">Eval / LLM-Ops</h2>
+          <h2 class="lang-fa">ارزیابی / عملیات</h2>
+          <p class="lang-en">Deterministic vs judge, JSONL tracing, and <code>make gate</code>.</p>
+          <p class="lang-fa">قطعی در برابر داور، ردیابی JSONL، و <code>make gate</code>.</p>
+          <div class="meta">~15 min · ops/ + evals/</div>
+        </div>
+      </a>
+
+      <a href="./0006-one-full-turn.html">
+        <span class="num">0006</span>
+        <div>
+          <h2 class="lang-en">One full turn</h2>
+          <h2 class="lang-fa">یک نوبت کامل</h2>
+          <p class="lang-en">Capstone: trace one message through <code>Yar.respond()</code> and every pillar.</p>
+          <p class="lang-fa">جمع‌بندی: یک پیام را از <code>Yar.respond()</code> و هر ستون رد کنید.</p>
+          <div class="meta">~15 min · app.py</div>
+        </div>
+      </a>
+    </nav>
+
+    <h2 class="lang-en">References</h2>
+    <h2 class="lang-fa">مراجع</h2>
+    <nav class="nav-links">
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+      <a href="../reference/loop-cheatsheet.html">
+        <span class="lang-en">Loop cheat sheet</span>
+        <span class="lang-fa">برگهٔ تقلب حلقه</span>
+      </a>
+      <a href="../reference/harness-cheatsheet.html">
+        <span class="lang-en">Harness cheat sheet</span>
+        <span class="lang-fa">برگهٔ تقلب درگاه</span>
+      </a>
+      <a href="../reference/memory-cheatsheet.html">
+        <span class="lang-en">Memory cheat sheet</span>
+        <span class="lang-fa">برگهٔ تقلب حافظه</span>
+      </a>
+      <a href="../reference/eval-cheatsheet.html">
+        <span class="lang-en">Eval cheat sheet</span>
+        <span class="lang-fa">برگهٔ تقلب ارزیابی</span>
+      </a>
+      <a href="../reference/one-turn-cheatsheet.html">
+        <span class="lang-en">One-turn cheat sheet</span>
+        <span class="lang-fa">برگهٔ تقلب یک نوبت</span>
+      </a>
+      <a href="../MISSION.md">MISSION.md</a>
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Open <code>index.html</code> in a browser · shared styles in <code>../assets/</code></span>
+    <span class="lang-fa">فایل <code>index.html</code> را در مرورگر باز کنید · استایل‌ها در <code>../assets/</code></span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>

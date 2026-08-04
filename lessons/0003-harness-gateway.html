@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0003 — Harness / Gateway | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/harness.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Lesson 0003 · Harness</span>
+      <span class="brand-sub lang-fa">درس ۰۰۰۳ · درگاه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Lesson 0003</span>
+      <span class="lang-en">~12 minutes · after
+        <a href="./0002-the-loop.html">0002</a></span>
+      <span class="lang-fa">حدود ۱۲ دقیقه · بعد از
+        <a href="./0002-the-loop.html">۰۰۰۲</a></span>
+    </div>
+
+    <h1 class="lang-en">The harness only moves text</h1>
+    <h1 class="lang-fa">درگاه فقط متن را جابه‌جا می‌کند</h1>
+
+    <p class="lede lang-en">
+      After the loop, the next clarity win is the boundary around it.
+      A <strong>gateway</strong> accepts user text and returns a reply string.
+      It does not plan, call tools, or consolidate memory — that stays in
+      <code>Yar.respond()</code> and the pillars behind it
+      (<a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a>).
+    </p>
+    <p class="lede lang-fa">
+      بعد از حلقه، برد بعدی مرز اطراف آن است.
+      <strong>درگاه</strong> متن کاربر را می‌گیرد و رشتهٔ پاسخ را برمی‌گرداند.
+      برنامه‌ریزی، ابزار، و تجمیع حافظه کار او نیست.
+    </p>
+
+    <h2 class="lang-en">Why this pillar exists</h2>
+    <h2 class="lang-fa">چرا این ستون وجود دارد</h2>
+
+    <p class="lang-en">
+      Anthropic’s advice for agents is to keep systems simple and transparent, and to treat the
+      agent–computer interface carefully
+      (<a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>).
+      Yar’s teaching move: put every surface (CLI, SPA, future adapters) in the same thin role —
+      <em>I/O only</em> — so you can swap the surface without rewriting the loop.
+      The docs say it flatly: “Gateways only move text; the loop stays ~95 lines.”
+    </p>
+    <p class="lang-fa">
+      توصیهٔ Anthropic: سامانه را ساده و شفاف نگه دارید.
+      حرکت آموزشی یار: هر سطح (CLI، SPA، آداپترهای بعدی) همان نقش نازک را دارد —
+      <em>فقط I/O</em> — تا بتوانید سطح را عوض کنید بدون بازنویسی حلقه.
+    </p>
+
+    <figure class="figure">
+      <div class="gateways">
+        <div class="gateway-card">
+          <h3 class="lang-en">CLI gateway</h3>
+          <h3 class="lang-fa">درگاه CLI</h3>
+          <p class="lang-en">Read line from terminal → <code>respond</code> → print reply. Live tool/gate lines via observer.</p>
+          <p class="lang-fa">خواندن خط از ترمینال ← <code>respond</code> ← چاپ پاسخ. خطوط زنده ابزار/دروازه با observer.</p>
+          <p class="path">backend/yar/gateway/cli.py</p>
+        </div>
+        <div class="gateway-card">
+          <h3 class="lang-en">SPA gateway</h3>
+          <h3 class="lang-fa">درگاه SPA</h3>
+          <p class="lang-en">React UI → REST/SSE on <code>:7777</code> → same <code>respond</code>. No Python module of its own.</p>
+          <p class="lang-fa">UI ری‌اکت ← REST/SSE روی <code>:7777</code> ← همان <code>respond</code>. ماژول پایتون جدا ندارد.</p>
+          <p class="path">frontend/ → ops/dashboard.py</p>
+        </div>
+      </div>
+      <div class="converge">Yar.respond(user_message, observer=…, source="cli" | "dashboard")</div>
+      <figcaption>
+        <span class="lang-en">Figure 1 — Two surfaces, one assembly entry
+          (<a href="../docs/ARCHITECTURE.md">§2 gateway/</a>).</span>
+        <span class="lang-fa">شکل ۱ — دو سطح، یک ورودی مونتاژ.</span>
+      </figcaption>
+    </figure>
+
+    <h2 class="lang-en">Real code: CLI</h2>
+    <h2 class="lang-fa">کد واقعی: CLI</h2>
+
+    <p class="lang-en">
+      The interesting part of <code>cli.py</code> is how little it does. Commands like
+      <code>/memory</code> are still harness concerns (read-only display) — they never enter the loop:
+    </p>
+    <p class="lang-fa">
+      بخش جالب <code>cli.py</code> این است که چقدر کم کار می‌کند. دستورهایی مثل
+      <code>/memory</code> هنوز کار درگاه‌اند (نمایش فقط‌خواندنی):
+    </p>
+
+    <pre class="code"><code><span class="c"># backend/yar/gateway/cli.py (abbreviated)</span>
+<span class="k">while</span> True:
+    user_message = console.input("you › ").strip()
+    <span class="k">if</span> user_message <span class="k">in</span> ("/quit", "/exit"):
+        <span class="k">break</span>
+    <span class="k">if</span> user_message == "/memory":
+        console.print(Panel(_memory_snapshot(yar.conn), ...))
+        <span class="k">continue</span>   <span class="c"># no respond() — still harness I/O</span>
+
+    result = yar.respond(user_message, observer=_observer, source=<span class="s">"cli"</span>)
+    console.print(f"yar › {result.reply}")</code></pre>
+
+    <p class="lang-en">
+      <code>_observer</code> only <em>prints</em> tool/gate/consolidation events. It does not decide
+      the next tool — that is the loop’s job (<a href="./0002-the-loop.html">lesson 0002</a>).
+    </p>
+    <p class="lang-fa">
+      <code>_observer</code> فقط رویدادها را <em>چاپ</em> می‌کند. ابزار بعدی را انتخاب نمی‌کند —
+      آن کار حلقه است.
+    </p>
+
+    <h2 class="lang-en">Real code: SPA path</h2>
+    <h2 class="lang-fa">کد واقعی: مسیر SPA</h2>
+
+    <p class="lang-en">
+      The dashboard collects observer events into JSON for the UI, then returns the same
+      <code>LoopResult</code> fields. Streaming is still harness packaging — SSE wraps the same turn:
+    </p>
+    <p class="lang-fa">
+      داشبورد رویدادهای observer را برای UI به JSON جمع می‌کند. استریم هم بسته‌بندی درگاه است —
+      SSE همان نوبت را می‌پیچد:
+    </p>
+
+    <pre class="code"><code><span class="c"># backend/yar/ops/dashboard.py — chat()</span>
+result = agent.respond(
+    message,
+    observer=<span class="k">lambda</span> kind, ev: events.append({"kind": kind, **ev}),
+    source=<span class="s">"dashboard"</span>,
+)
+<span class="k">return</span> {
+    "reply": result.reply,
+    "tool_calls": tools,
+    "iterations": result.iterations,
+    "meta": meta,
+    ...
+}</code></pre>
+
+    <p class="lang-en">
+      On the client, <code>api.chatStream()</code> in <code>frontend/src/lib/api.ts</code> posts to
+      <code>/api/chat/stream</code> and yields SSE events — still moving bytes, not reasoning.
+    </p>
+    <p class="lang-fa">
+      در کلاینت، <code>api.chatStream()</code> به <code>/api/chat/stream</code> پست می‌کند و رویداد SSE
+      می‌دهد — هنوز جابه‌جایی بایت است، نه استدلال.
+    </p>
+
+    <h2 class="lang-en">Skill: draw the boundary</h2>
+    <h2 class="lang-fa">مهارت: مرز را بکشید</h2>
+
+    <p class="lang-en">For each job, pick <strong>Harness</strong> or <strong>Loop</strong>.</p>
+    <p class="lang-fa">برای هر کار، <strong>درگاه</strong> یا <strong>حلقه</strong> را انتخاب کنید.</p>
+
+    <div class="figure boundary">
+      <div
+        class="boundary-item"
+        data-boundary
+        data-answer="harness"
+        data-ok-en="Harness — formatting JSON/SSE is packaging, not reasoning."
+        data-ok-fa="درگاه — قالب JSON/SSE بسته‌بندی است، نه استدلال."
+        data-bad-en="That packaging still sits outside run_loop."
+        data-bad-fa="آن بسته‌بندی هنوز بیرون run_loop است."
+      >
+        <p class="lang-en">Wrap tool events as SSE for the browser</p>
+        <p class="lang-fa">پیچیدن رویداد ابزار به‌صورت SSE برای مرورگر</p>
+        <div class="choices">
+          <button type="button" data-pick="harness">
+            <span class="lang-en">Harness</span><span class="lang-fa">درگاه</span>
+          </button>
+          <button type="button" data-pick="loop">
+            <span class="lang-en">Loop</span><span class="lang-fa">حلقه</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="boundary-item"
+        data-boundary
+        data-answer="loop"
+        data-ok-en="Loop — deciding to call create_event is reason→act."
+        data-ok-fa="حلقه — تصمیم create_event همان استدلال←عمل است."
+        data-bad-en="The gateway never chooses tools."
+        data-bad-fa="درگاه هرگز ابزار را انتخاب نمی‌کند."
+      >
+        <p class="lang-en">Decide to call create_event this iteration</p>
+        <p class="lang-fa">تصمیم به فراخوانی create_event در این تکرار</p>
+        <div class="choices">
+          <button type="button" data-pick="harness">
+            <span class="lang-en">Harness</span><span class="lang-fa">درگاه</span>
+          </button>
+          <button type="button" data-pick="loop">
+            <span class="lang-en">Loop</span><span class="lang-fa">حلقه</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="boundary-item"
+        data-boundary
+        data-answer="harness"
+        data-ok-en="Harness — /memory is a read-only CLI display shortcut."
+        data-ok-fa="درگاه — /memory میانبر نمایش فقط‌خواندنی CLI است."
+        data-bad-en="It never enters run_loop; see the continue in cli.py."
+        data-bad-fa="وارد run_loop نمی‌شود؛ continue در cli.py را ببینید."
+      >
+        <p class="lang-en">Handle the /memory slash command</p>
+        <p class="lang-fa">پردازش دستور اسلش /memory</p>
+        <div class="choices">
+          <button type="button" data-pick="harness">
+            <span class="lang-en">Harness</span><span class="lang-fa">درگاه</span>
+          </button>
+          <button type="button" data-pick="loop">
+            <span class="lang-en">Loop</span><span class="lang-fa">حلقه</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="boundary-item"
+        data-boundary
+        data-answer="loop"
+        data-ok-en="Loop — stop when there are no tool_calls (guardrail 1)."
+        data-ok-fa="حلقه — توقف وقتی tool_calls نباشد (حفاظ ۱)."
+        data-bad-en="Exit conditions live inside run_loop, not the CLI."
+        data-bad-fa="شرط خروج داخل run_loop است، نه CLI."
+      >
+        <p class="lang-en">Stop the turn when the model returns no tools</p>
+        <p class="lang-fa">پایان نوبت وقتی مدل ابزاری برنگرداند</p>
+        <div class="choices">
+          <button type="button" data-pick="harness">
+            <span class="lang-en">Harness</span><span class="lang-fa">درگاه</span>
+          </button>
+          <button type="button" data-pick="loop">
+            <span class="lang-en">Loop</span><span class="lang-fa">حلقه</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h3 class="lang-en">Seams, not second implementations</h3>
+      <h3 class="lang-fa">درز، نه پیاده‌سازی دوم</h3>
+      <p class="lang-en">
+        Voice and Telegram gateways are deliberately out of scope in Yar
+        (<a href="../docs/ARCHITECTURE.md">§13</a>). If you added one, it would still only move text
+        into <code>respond()</code> — same pillar, new adapter. That is how the curriculum stays
+        aligned with the repo’s “one of everything on the default path” rule.
+      </p>
+      <p class="lang-fa">
+        درگاه صدا و تلگرام عمداً خارج از محدوده‌اند (§۱۳). اگر اضافه شوند، باز هم فقط متن را به
+        <code>respond()</code> می‌رسانند — همان ستون، آداپتر جدید.
+      </p>
+    </div>
+
+    <div class="callout primary">
+      <h3 class="lang-en">Primary source</h3>
+      <h3 class="lang-fa">منبع اصلی</h3>
+      <p class="lang-en">
+        Skim the simplicity / transparency principles in
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>,
+        then read <code>backend/yar/gateway/cli.py</code> top-to-bottom (it is short).
+        Pair with <a href="../reference/harness-cheatsheet.html">the harness cheat sheet</a>.
+      </p>
+      <p class="lang-fa">
+        اصول سادگی و شفافیت را در
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>
+        مرور کنید، بعد <code>cli.py</code> را سر تا ته بخوانید (کوتاه است).
+        <a href="../reference/harness-cheatsheet.html">برگهٔ تقلب درگاه</a> را کنار بگذارید.
+      </p>
+    </div>
+
+    <nav class="nav-links">
+      <a href="./0002-the-loop.html">
+        <span class="lang-en">← 0002 The Loop</span>
+        <span class="lang-fa">← ۰۰۰۲ حلقه</span>
+      </a>
+      <a href="../reference/harness-cheatsheet.html">
+        <span class="lang-en">Reference: harness</span>
+        <span class="lang-fa">مرجع: درگاه</span>
+      </a>
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+      <span class="lang-en">Next up: <a href="./0004-memory.html">0004 — Memory</a></span>
+      <span class="lang-fa">درس بعد: <a href="./0004-memory.html">۰۰۰۴ — حافظه</a></span>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Citations: Anthropic (2024); Yar cli.py, dashboard.py, ARCHITECTURE.md</span>
+    <span class="lang-fa">استنادها: Anthropic (۲۰۲۴)؛ cli.py و dashboard.py و معماری یار</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+  <script src="../assets/boundary.js"></script>
+</body>
+</html>

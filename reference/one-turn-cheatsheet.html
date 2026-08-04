@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reference — One turn | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="../lessons/0006-one-full-turn.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Reference · One turn</span>
+      <span class="brand-sub lang-fa">مرجع · یک نوبت</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta"><span class="pill">Reference</span></div>
+
+    <h1 class="lang-en">One turn — assembly cheat sheet</h1>
+    <h1 class="lang-fa">یک نوبت — برگهٔ تقلب مونتاژ</h1>
+
+    <p class="lede lang-en">
+      Source: <code>backend/yar/app.py</code> · <code>Yar.respond()</code> ·
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a>
+    </p>
+    <p class="lede lang-fa">
+      منبع: <code>Yar.respond()</code> در <code>app.py</code>
+    </p>
+
+    <pre class="code"><code>Gateway
+  → Yar.respond()
+      → Session.build_system()       # SOUL + clock + gated memory + skills
+      → run_loop(client, tools)      # reason → act → observe
+      → Session.add_exchange()       # history + chat_log (+ tools fold-in)
+      → Memory.maybe_consolidate()   # every N exchanges → facts + episode
+      → Memory.export_markdown()     # .yar/MEMORY.md
+  → Tracer JSONL (+ optional OTel)</code></pre>
+
+    <h2 class="lang-en">Pillar map</h2>
+    <h2 class="lang-fa">نقشهٔ ستون‌ها</h2>
+    <ul>
+      <li><span class="lang-en"><strong>Harness</strong> — delivers string, shows observer, returns reply</span><span class="lang-fa"><strong>درگاه</strong> — رشته می‌دهد، observer نشان می‌دهد، پاسخ برمی‌گرداند</span></li>
+      <li><span class="lang-en"><strong>Memory</strong> — gate + skills in <code>build_system</code>; consolidate after</span><span class="lang-fa"><strong>حافظه</strong> — دروازه + مهارت در <code>build_system</code>؛ بعد تجمیع</span></li>
+      <li><span class="lang-en"><strong>Loop</strong> — <code>run_loop</code></span><span class="lang-fa"><strong>حلقه</strong> — <code>run_loop</code></span></li>
+      <li><span class="lang-en"><strong>Eval / Ops</strong> — Tracer wraps the turn; evals run offline via <code>make gate</code></span><span class="lang-fa"><strong>ارزیابی</strong> — Tracer نوبت را می‌پوشاند؛ ارزیابی آفلاین با <code>make gate</code></span></li>
+    </ul>
+
+    <nav class="nav-links">
+      <a href="../lessons/0006-one-full-turn.html">
+        <span class="lang-en">Lesson 0006</span>
+        <span class="lang-fa">درس ۰۰۰۶</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Yar curriculum reference</span>
+    <span class="lang-fa">مرجع دورهٔ یار</span>
+  </footer>
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>

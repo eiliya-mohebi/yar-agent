@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0004 — Memory | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/memory.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Lesson 0004 · Memory</span>
+      <span class="brand-sub lang-fa">درس ۰۰۰۴ · حافظه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Lesson 0004</span>
+      <span class="lang-en">~15 minutes · after
+        <a href="./0003-harness-gateway.html">0003</a></span>
+      <span class="lang-fa">حدود ۱۵ دقیقه · بعد از
+        <a href="./0003-harness-gateway.html">۰۰۰۳</a></span>
+    </div>
+
+    <h1 class="lang-en">Memory is durable state — with a gate</h1>
+    <h1 class="lang-fa">حافظه حالت پایدار است — با یک دروازه</h1>
+
+    <p class="lede lang-en">
+      The loop’s <code>messages</code> list is <em>working</em> memory for one turn.
+      Agents that feel personal also need <em>durable</em> memory across turns —
+      without stuffing the whole database into every prompt.
+      Yar’s answer lives in <code>yar/memory/</code> + one SQLite file
+      (<a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §6</a>).
+    </p>
+    <p class="lede lang-fa">
+      لیست <code>messages</code> حلقه، حافظهٔ <em>کاری</em> یک نوبت است.
+      عاملِ شخصی به حافظهٔ <em>پایدار</em> هم نیاز دارد — بدون ریختن کل دیتابیس در هر پرامپت.
+    </p>
+
+    <h2 class="lang-en">Three kinds of durable memory</h2>
+    <h2 class="lang-fa">سه گونه حافظهٔ پایدار</h2>
+
+    <p class="lang-en">
+      OpenAI’s reliability notes separate short-term session context from durable memory that later
+      runs can reuse
+      (<a href="https://developers.openai.com/cookbook/examples/agents_sdk/building_reliable_agents_memory_compaction">Memory and compaction</a>).
+      Yar names three stores, all local, no embeddings on the default path:
+    </p>
+    <p class="lang-fa">
+      یادداشت‌های OpenAI بین بافت جلسه و حافظهٔ پایدار فرق می‌گذارند.
+      یار سه مخزن محلی دارد، بدون embedding در مسیر پیش‌فرض:
+    </p>
+
+    <figure class="figure">
+      <div class="mem-types">
+        <div class="mem-card">
+          <h3 class="lang-en">Semantic</h3>
+          <h3 class="lang-fa">معنایی</h3>
+          <p class="lang-en">Durable facts about people, preferences, projects. FTS5 / BM25 keyword search.</p>
+          <p class="lang-fa">حقایق پایدار دربارهٔ افراد، ترجیحات، پروژه‌ها. جستجوی کلیدواژه FTS5.</p>
+          <p class="path">facts + facts_fts</p>
+        </div>
+        <div class="mem-card">
+          <h3 class="lang-en">Episodic</h3>
+          <h3 class="lang-fa">اپیزودیک</h3>
+          <p class="lang-en">Dated “what happened” summaries. Keyword + recency.</p>
+          <p class="lang-fa">خلاصه‌های تاریخ‌دار «چه شد». کلیدواژه + تازگی.</p>
+          <p class="path">episodes + episodes_fts</p>
+        </div>
+        <div class="mem-card">
+          <h3 class="lang-en">Procedural</h3>
+          <h3 class="lang-fa">رویه‌ای</h3>
+          <p class="lang-en">How to act — SKILL.md files. Token overlap ≥ 2, top 2 skills.</p>
+          <p class="lang-fa">چگونه عمل کند — فایل‌های SKILL.md. هم‌پوشانی توکن ≥ ۲.</p>
+          <p class="path">skills/**/SKILL.md</p>
+        </div>
+      </div>
+      <figcaption>
+        <span class="lang-en">Figure 1 — Facade: <code>Memory</code> in <code>memory/__init__.py</code>.</span>
+        <span class="lang-fa">شکل ۱ — نمای بیرونی: کلاس <code>Memory</code>.</span>
+      </figcaption>
+    </figure>
+
+    <h2 class="lang-en">Hero #1 — the retrieval gate</h2>
+    <h2 class="lang-fa">قهرمان ۱ — دروازهٔ بازیابی</h2>
+
+    <p class="lang-en">
+      Default-on retrieval is slow and biases answers with irrelevant facts.
+      A small model answers: does <em>this</em> message need the user’s memory?
+      (<code>retrieval_gate.py</code> docstring — “hero moment #1”.)
+    </p>
+    <p class="lang-fa">
+      بازیابی همیشگی کند است و پاسخ را با حقایق نامرتبط منحرف می‌کند.
+      یک مدل کوچک می‌پرسد: آیا <em>این</em> پیام به حافظهٔ کاربر نیاز دارد؟
+    </p>
+
+    <figure class="figure">
+      <div class="mem-flow">
+        <span>user message</span><span class="arrow">→</span>
+        <span>should_retrieve?</span><span class="arrow">→</span>
+        <span>skip → ""</span>
+        <span class="arrow">|</span>
+        <span>retrieve → FTS facts + episodes</span>
+      </div>
+      <figcaption>
+        <span class="lang-en">Figure 2 — Wired in <code>Memory.gated_retrieve()</code>; observer emits <code>gate</code>.</span>
+        <span class="lang-fa">شکل ۲ — در <code>gated_retrieve()</code>؛ observer رویداد <code>gate</code> می‌فرستد.</span>
+      </figcaption>
+    </figure>
+
+    <pre class="code"><code><span class="c"># memory/__init__.py — gated_retrieve (abbreviated)</span>
+retrieve, query, reason = retrieval_gate.should_retrieve(
+    self.client, self.settings.small_model, message
+)
+<span class="k">if not</span> retrieve:
+    <span class="k">return</span> ""
+found = self.facts.search(query, self.settings.retrieval_top_k)
+found += self.episodes.search(query, top_k=3)
+<span class="k">return</span> "\n".join(found)</code></pre>
+
+    <p class="lang-en">
+      <strong>Fails open:</strong> parse/LLM error → retrieve anyway
+      (“a stale memory beats a lost one” — gate module comment).
+      JSON keys stay English; the <code>query</code> stays in the user’s language so FTS can match Persian facts (§7).
+    </p>
+    <p class="lang-fa">
+      <strong>شکستِ باز:</strong> خطا → باز هم بازیابی کن.
+      کلیدهای JSON انگلیسی می‌مانند؛ <code>query</code> به زبان کاربر می‌ماند تا FTS حقایق فارسی را بیابد (§۷).
+    </p>
+
+    <h2 class="lang-en">Skill: would the gate retrieve?</h2>
+    <h2 class="lang-fa">مهارت: دروازه بازیابی می‌کند؟</h2>
+
+    <p class="lang-en">
+      From the gate prompt’s rule of thumb: general knowledge / math / small talk → skip;
+      user’s life, people, plans, history → retrieve.
+    </p>
+    <p class="lang-fa">
+      قاعدهٔ سرانگشتی پرامپت دروازه: دانش عمومی / ریاضی / گپ → رد؛
+      زندگی، افراد، برنامه‌ها، تاریخچهٔ کاربر → بازیابی.
+    </p>
+
+    <div class="figure gate-drill">
+      <div
+        class="gate-item"
+        data-gate
+        data-answer="skip"
+        data-ok-en="Skip — pure math; no user memory needed."
+        data-ok-fa="رد — ریاضی خالص؛ حافظهٔ کاربر لازم نیست."
+        data-bad-en="Gate prompt: general knowledge / math → false."
+        data-bad-fa="پرامپت دروازه: دانش عمومی / ریاضی → false."
+      >
+        <p class="msg lang-en">“What’s 2 + 2?”</p>
+        <p class="msg lang-fa">«۲ به علاوهٔ ۲ چند می‌شود؟»</p>
+        <div class="choices">
+          <button type="button" data-pick="retrieve">
+            <span class="lang-en">Retrieve</span><span class="lang-fa">بازیابی</span>
+          </button>
+          <button type="button" data-pick="skip">
+            <span class="lang-en">Skip</span><span class="lang-fa">رد کردن</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="gate-item"
+        data-gate
+        data-answer="retrieve"
+        data-ok-en="Retrieve — references the user’s plans / people."
+        data-ok-fa="بازیابی — به برنامه‌ها / افراد کاربر اشاره دارد."
+        data-bad-en="User life and plans → retrieve with a search query."
+        data-bad-fa="زندگی و برنامهٔ کاربر → بازیابی با کوئری جستجو."
+      >
+        <p class="msg lang-en">“When am I meeting Alex?”</p>
+        <p class="msg lang-fa">«کی با الکس قرار دارم؟»</p>
+        <div class="choices">
+          <button type="button" data-pick="retrieve">
+            <span class="lang-en">Retrieve</span><span class="lang-fa">بازیابی</span>
+          </button>
+          <button type="button" data-pick="skip">
+            <span class="lang-en">Skip</span><span class="lang-fa">رد کردن</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="gate-item"
+        data-gate
+        data-answer="retrieve"
+        data-ok-en="Retrieve — preference / personal fact territory."
+        data-ok-fa="بازیابی — قلمرو ترجیح / حقیقت شخصی."
+        data-bad-en="Preferences live in semantic facts."
+        data-bad-fa="ترجیحات در حقایق معنایی زندگی می‌کنند."
+      >
+        <p class="msg lang-en">“Do I prefer morning or evening workouts?”</p>
+        <p class="msg lang-fa">«تمرین صبح را دوست دارم یا عصر؟»</p>
+        <div class="choices">
+          <button type="button" data-pick="retrieve">
+            <span class="lang-en">Retrieve</span><span class="lang-fa">بازیابی</span>
+          </button>
+          <button type="button" data-pick="skip">
+            <span class="lang-en">Skip</span><span class="lang-fa">رد کردن</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="gate-item"
+        data-gate
+        data-answer="skip"
+        data-ok-en="Skip — self-contained small talk / weather of the moment."
+        data-ok-fa="رد — گپ خودکفا / وضع لحظه‌ای."
+        data-bad-en="No durable user history is required to greet."
+        data-bad-fa="برای سلام به تاریخچهٔ پایدار نیاز نیست."
+      >
+        <p class="msg lang-en">“Hi — how’s it going?”</p>
+        <p class="msg lang-fa">«سلام، حالت چطوره؟»</p>
+        <div class="choices">
+          <button type="button" data-pick="retrieve">
+            <span class="lang-en">Retrieve</span><span class="lang-fa">بازیابی</span>
+          </button>
+          <button type="button" data-pick="skip">
+            <span class="lang-en">Skip</span><span class="lang-fa">رد کردن</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <h2 class="lang-en">Hero #2 — consolidation</h2>
+    <h2 class="lang-fa">قهرمان ۲ — تجمیع</h2>
+
+    <p class="lang-en">
+      After the reply, <code>Yar.respond()</code> calls <code>memory.maybe_consolidate()</code>.
+      When unconsolidated <code>chat_log</code> rows ≥ <code>consolidate_every * 2</code>
+      (default 6 → trigger at 12 rows), a small model distills <code>facts[]</code> + one
+      <code>episode</code>, then marks rows consolidated.
+      <strong>Loss-safe:</strong> on failure, leave rows unmarked — chat is not deleted
+      (<a href="../docs/ARCHITECTURE.md">§6</a>).
+    </p>
+    <p class="lang-fa">
+      بعد از پاسخ، <code>maybe_consolidate()</code> صدا زده می‌شود.
+      وقتی ردیف‌های تجمیع‌نشده به آستانه برسند، مدل ارزان حقایق + یک اپیزود می‌سازد.
+      <strong>ایمن در برابر ازدست‌رفتن:</strong> اگر شکست خورد، ردیف‌ها علامت نمی‌خورند.
+    </p>
+
+    <h2 class="lang-en">Procedural memory (skills)</h2>
+    <h2 class="lang-fa">حافظهٔ رویه‌ای (مهارت‌ها)</h2>
+
+    <p class="lang-en">
+      Skills are not retrieved by the gate. They match by keyword overlap on
+      <code>name + description</code> via <code>text.tokens()</code> — Unicode, bilingual stopwords,
+      overlap ≥ 2, top 2. Descriptions must carry Persian <strong>and</strong> English triggers
+      or فارسی silently fails to match (§7).
+    </p>
+    <p class="lang-fa">
+      مهارت‌ها از دروازه عبور نمی‌کنند. با هم‌پوشانی کلیدواژه روی
+      <code>name + description</code> جور می‌شوند — یونیکد، stopword دوزبانه، ≥ ۲، حداکثر ۲.
+      توضیحات باید محرک فارسی <strong>و</strong> انگلیسی داشته باشند وگرنه فارسی خاموش شکست می‌خورد (§۷).
+    </p>
+
+    <h2 class="lang-en">Check yourself</h2>
+    <h2 class="lang-fa">خودتان را بیازمایید</h2>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="b"
+      data-ok-en="Yes — episodic stores dated ‘what happened’ summaries."
+      data-ok-fa="بله — اپیزودیک خلاصه‌های تاریخ‌دار «چه شد» را نگه می‌دارد."
+      data-bad-en="Hint: facts are semantic; how-tos are procedural."
+      data-bad-fa="راهنما: حقایق معنایی‌اند؛ دستورالعمل‌ها رویه‌ای."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">1. “Last Tuesday we booked lunch with Sara” belongs in…</span>
+        <span class="lang-fa">۱. «سه‌شنبهٔ قبل ناهار با سارا هماهنگ شد» متعلق به…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Procedural SKILL.md on disk alone</span>
+          <span class="lang-fa">فقط فایل SKILL.md رویه‌ای روی دیسک</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Episodic memory as a dated summary</span>
+          <span class="lang-fa">حافظهٔ اپیزودیک به‌صورت خلاصهٔ تاریخ‌دار</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Harness observer print formatting</span>
+          <span class="lang-fa">قالب‌بندی چاپ observer در درگاه</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Loop max_iterations hard stop only</span>
+          <span class="lang-fa">فقط توقف سخت max_iterations حلقه</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="c"
+      data-ok-en="Correct — fail open means retrieve on gate errors."
+      data-ok-fa="درست — شکستِ باز یعنی در خطای دروازه باز هم بازیابی کن."
+      data-bad-en="Hint: ‘a stale memory beats a lost one’."
+      data-bad-fa="راهنما: «حافظهٔ کهنه بهتر از حافظهٔ ازدست‌رفته است»."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">2. If the gate’s JSON parse fails, Yar will…</span>
+        <span class="lang-fa">۲. اگر پارس JSON دروازه شکست بخورد، یار…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Crash the whole CLI process hard</span>
+          <span class="lang-fa">کل فرایند CLI را سخت کرش می‌کند</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Skip memory and clear chat_log</span>
+          <span class="lang-fa">حافظه را رد و chat_log را پاک می‌کند</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Fail open and retrieve anyway</span>
+          <span class="lang-fa">شکستِ باز می‌دهد و باز بازیابی می‌کند</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Install a new skill from a URL</span>
+          <span class="lang-fa">مهارت تازه‌ای از یک URL نصب می‌کند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="a"
+      data-ok-en="Right — consolidation is loss-safe; unmarked rows can retry."
+      data-ok-fa="درست — تجمیع ایمن است؛ ردیف‌های بدون علامت دوباره می‌آیند."
+      data-bad-en="Hint: on summarizer failure, leave rows unmarked."
+      data-bad-fa="راهنما: اگر summarizer شکست خورد، ردیف‌ها علامت نخورند."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">3. Consolidation fails mid-summarize. Chat rows…</span>
+        <span class="lang-fa">۳. تجمیع وسط خلاصه‌سازی می‌شکند. ردیف‌های چت…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Stay unconsolidated for a later try</span>
+          <span class="lang-fa">تجمیع‌نشده می‌مانند برای تلاش بعدی</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Are deleted so the DB stays clean</span>
+          <span class="lang-fa">حذف می‌شوند تا دیتابیس تمیز بماند</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Move into a SKILL.md automatically</span>
+          <span class="lang-fa">خودکار به یک SKILL.md منتقل می‌شوند</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Force the SPA gateway to reconnect</span>
+          <span class="lang-fa">درگاه SPA را مجبور به اتصال دوباره می‌کنند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="callout primary">
+      <h3 class="lang-en">Primary source</h3>
+      <h3 class="lang-fa">منبع اصلی</h3>
+      <p class="lang-en">
+        Read <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §6</a> (three types + two heroes),
+        then skim <code>retrieval_gate.py</code> and the match algorithm in
+        <code>procedural/loader.py</code>.
+        Keep <a href="../reference/memory-cheatsheet.html">the memory cheat sheet</a> open.
+        Optional industry parallel:
+        <a href="https://developers.openai.com/cookbook/examples/agents_sdk/building_reliable_agents_memory_compaction">OpenAI memory &amp; compaction</a>.
+      </p>
+      <p class="lang-fa">
+        <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §۶</a> را بخوانید، بعد
+        <code>retrieval_gate.py</code> و الگوریتم match در <code>loader.py</code> را مرور کنید.
+        <a href="../reference/memory-cheatsheet.html">برگهٔ تقلب حافظه</a> را باز بگذارید.
+      </p>
+    </div>
+
+    <nav class="nav-links">
+      <a href="./0003-harness-gateway.html">
+        <span class="lang-en">← 0003 Harness</span>
+        <span class="lang-fa">← ۰۰۰۳ درگاه</span>
+      </a>
+      <a href="../reference/memory-cheatsheet.html">
+        <span class="lang-en">Reference: memory</span>
+        <span class="lang-fa">مرجع: حافظه</span>
+      </a>
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+      <span class="lang-en">Next up: <a href="./0005-eval-ops.html">0005 — Eval / Ops</a></span>
+      <span class="lang-fa">درس بعد: <a href="./0005-eval-ops.html">۰۰۰۵ — ارزیابی / عملیات</a></span>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Citations: Yar ARCHITECTURE §6–7; retrieval_gate.py; OpenAI memory cookbook via RESOURCES.md</span>
+    <span class="lang-fa">استنادها: معماری یار §۶–۷؛ retrieval_gate.py؛ cookbook حافظه OpenAI</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+  <script src="../assets/quiz.js"></script>
+  <script src="../assets/gate-drill.js"></script>
+</body>
+</html>

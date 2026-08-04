@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reference — The Loop | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/loop.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="../lessons/0002-the-loop.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Reference · Loop</span>
+      <span class="brand-sub lang-fa">مرجع · حلقه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Reference</span>
+      <span class="lang-en">Print-friendly cheat sheet</span>
+      <span class="lang-fa">برگهٔ تقلب مناسب چاپ</span>
+    </div>
+
+    <h1 class="lang-en">The loop — cheat sheet</h1>
+    <h1 class="lang-fa">حلقه — برگهٔ تقلب</h1>
+
+    <p class="lede lang-en">
+      Source of truth: <code>backend/yar/loop/agent.py</code> ·
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §3</a>
+    </p>
+    <p class="lede lang-fa">
+      منبع: <code>backend/yar/loop/agent.py</code> ·
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §3</a>
+    </p>
+
+    <h2 class="lang-en">Skeleton</h2>
+    <h2 class="lang-fa">اسکلت</h2>
+    <pre class="code"><code>while not done:
+    response = llm(messages, tools)     # reason
+    if response asks for tools:
+        results = run(tool_calls)       # act
+        messages += results             # observe
+    else:
+        done                            # reply to human</code></pre>
+
+    <h2 class="lang-en">Two guardrails</h2>
+    <h2 class="lang-fa">دو حفاظ</h2>
+    <ol>
+      <li>
+        <span class="lang-en"><strong>No tool_calls</strong> → natural end; return <code>message.content</code>.</span>
+        <span class="lang-fa"><strong>بدون tool_calls</strong> → پایان طبیعی؛ برگرداندن <code>message.content</code>.</span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>max_iterations</strong> → hard stop; never spin forever.</span>
+        <span class="lang-fa"><strong>max_iterations</strong> → توقف سخت؛ حلقه تا ابد نچرخد.</span>
+      </li>
+    </ol>
+
+    <h2 class="lang-en">Yar specifics</h2>
+    <h2 class="lang-fa">ویژگی‌های یار</h2>
+    <ul>
+      <li class="lang-en">Wire format: OpenAI <code>chat.completions</code> (<code>role: tool</code>, <code>tool_calls</code>).</li>
+      <li class="lang-fa">فرمت سیم: OpenAI <code>chat.completions</code>.</li>
+      <li class="lang-en"><code>messages</code> mutated in place = traced working memory after the call.</li>
+      <li class="lang-fa"><code>messages</code> درجا عوض می‌شود = حافظهٔ کاری ردیابی‌شده.</li>
+      <li class="lang-en"><code>Observer</code> for live UI + tracing — not part of loop logic.</li>
+      <li class="lang-fa"><code>Observer</code> برای UI زنده و ردیابی — داخل منطق حلقه نیست.</li>
+      <li class="lang-en">Entry: <code>run_loop()</code> → <code>LoopResult(reply, tool_calls, iterations)</code>.</li>
+      <li class="lang-fa">ورودی: <code>run_loop()</code> → <code>LoopResult</code>.</li>
+    </ul>
+
+    <h2 class="lang-en">Industry echo</h2>
+    <h2 class="lang-fa">پژواک صنعتی</h2>
+    <p class="lang-en">
+      “Agents are typically just LLMs using tools based on environmental feedback in a loop.”
+      — <a href="https://www.anthropic.com/engineering/building-effective-agents">Anthropic</a>.
+      Include stopping conditions (e.g. max iterations).
+    </p>
+    <p class="lang-fa">
+      «عامل‌ها معمولاً همان مدل‌هایی‌اند که با بازخورد محیط در یک حلقه از ابزار استفاده می‌کنند.»
+      — Anthropic. شرط توقف (مثل سقف تکرار) را بگذارید.
+    </p>
+
+    <nav class="nav-links">
+      <a href="../lessons/0002-the-loop.html">
+        <span class="lang-en">Lesson 0002</span>
+        <span class="lang-fa">درس ۰۰۰۲</span>
+      </a>
+      <a href="./four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Yar curriculum reference</span>
+    <span class="lang-fa">مرجع دورهٔ یار</span>
+  </footer>
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>
