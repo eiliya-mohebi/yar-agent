@@ -1,0 +1,72 @@
+/* Full-turn walkthrough (lesson 0006) */
+
+.turn-map {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.turn-step {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.turn-step:hover,
+.turn-step:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.turn-step.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.turn-step .n {
+  font-family: var(--font-display);
+  font-weight: 650;
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+
+.turn-step .pillar-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.turn-detail {
+  display: none;
+  margin-top: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--accent);
+  background: var(--card);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.turn-detail.is-open {
+  display: block;
+}
+
+body[data-lang="fa"] .turn-detail {
+  border-left: 0;
+  border-right: 3px solid var(--accent);
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.turn-detail .path {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin: 0.5rem 0 0;
+  direction: ltr;
+  text-align: left;
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reference — Harness | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/harness.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="../lessons/0003-harness-gateway.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Reference · Harness</span>
+      <span class="brand-sub lang-fa">مرجع · درگاه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Reference</span>
+    </div>
+
+    <h1 class="lang-en">Harness / Gateway — cheat sheet</h1>
+    <h1 class="lang-fa">درگاه / Harness — برگهٔ تقلب</h1>
+
+    <p class="lede lang-en">
+      Rule: <strong>move text in and out; do not reason.</strong>
+      Sources: <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1–2</a>,
+      <code>gateway/cli.py</code>, <code>ops/dashboard.py</code>.
+    </p>
+    <p class="lede lang-fa">
+      قانون: <strong>متن را جابه‌جا کن؛ استدلال نکن.</strong>
+    </p>
+
+    <h2 class="lang-en">Two gateways → one API</h2>
+    <h2 class="lang-fa">دو درگاه ← یک API</h2>
+    <ul>
+      <li>
+        <span class="lang-en"><strong>CLI</strong> — <code>yar/gateway/cli.py</code> → <code>yar.respond(..., source="cli")</code></span>
+        <span class="lang-fa"><strong>CLI</strong> — <code>cli.py</code> → <code>respond(..., source="cli")</code></span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>SPA</strong> — Vite React → <code>/api/chat</code> or <code>/api/chat/stream</code> → <code>respond(..., source="dashboard")</code></span>
+        <span class="lang-fa"><strong>SPA</strong> — React → API داشبورد → <code>respond(..., source="dashboard")</code></span>
+      </li>
+    </ul>
+
+    <h2 class="lang-en">Observer</h2>
+    <h2 class="lang-fa">Observer</h2>
+    <p class="lang-en">
+      Callback of shape <code>(kind, event) → None</code>. Gateways print or collect
+      <code>tool</code> / <code>gate</code> / <code>text</code> events; Tracer also listens.
+      Loop logic stays unaware of who is watching.
+    </p>
+    <p class="lang-fa">
+      callback برای تماشا. منطق حلقه نمی‌داند چه کسی نگاه می‌کند.
+    </p>
+
+    <h2 class="lang-en">Out of scope (seams only)</h2>
+    <h2 class="lang-fa">خارج از محدوده</h2>
+    <p class="lang-en">
+      Voice and Telegram gateways were cut on purpose — same harness rule would apply if restored
+      (<a href="../docs/ARCHITECTURE.md">§13</a>).
+    </p>
+    <p class="lang-fa">
+      درگاه صدا و تلگرام عمداً حذف شده‌اند؛ اگر برگردند همان قانون درگاه اعمال می‌شود (§۱۳).
+    </p>
+
+    <nav class="nav-links">
+      <a href="../lessons/0003-harness-gateway.html">
+        <span class="lang-en">Lesson 0003</span>
+        <span class="lang-fa">درس ۰۰۰۳</span>
+      </a>
+      <a href="./four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Yar curriculum reference</span>
+    <span class="lang-fa">مرجع دورهٔ یار</span>
+  </footer>
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>

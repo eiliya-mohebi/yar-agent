@@ -1,0 +1,139 @@
+/* Loop simulator + step diagram (lesson 0002+) */
+
+.loop-diagram {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.loop-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+}
+
+.loop-step .n {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 1.1rem;
+  color: var(--accent);
+  min-width: 1.5rem;
+}
+
+.loop-step strong {
+  display: block;
+  font-family: var(--font-display);
+  margin-bottom: 0.2rem;
+}
+
+.loop-step.is-exit {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+}
+
+.sim {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.sim-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sim-toolbar button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.sim-toolbar button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.sim-toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sim-meta {
+  margin-inline-start: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.sim-stage {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .sim-stage {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sim-panel {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  min-height: 9rem;
+}
+
+.sim-panel h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+
+.sim-panel ul {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.sim-panel .hl {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.sim-narration {
+  grid-column: 1 / -1;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: #15202b;
+  color: #e8eef4;
+  font-size: 0.92rem;
+  min-height: 3.2rem;
+}
+
+body[data-lang="fa"] .sim-panel ul {
+  direction: ltr;
+  text-align: left;
+}

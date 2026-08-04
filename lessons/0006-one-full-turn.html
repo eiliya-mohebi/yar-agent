@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0006 — One Full Turn | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/turn.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Lesson 0006 · One full turn</span>
+      <span class="brand-sub lang-fa">درس ۰۰۰۶ · یک نوبت کامل</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Lesson 0006</span>
+      <span class="lang-en">~15 minutes · capstone after
+        <a href="./0005-eval-ops.html">0005</a></span>
+      <span class="lang-fa">حدود ۱۵ دقیقه · جمع‌بندی بعد از
+        <a href="./0005-eval-ops.html">۰۰۰۵</a></span>
+    </div>
+
+    <h1 class="lang-en">Trace one message through every pillar</h1>
+    <h1 class="lang-fa">یک پیام را از هر ستون رد کنید</h1>
+
+    <p class="lede lang-en">
+      This is the curriculum’s payoff: one user string enters a gateway and
+      <code>Yar.respond()</code> runs the assembly flow from
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a>.
+      Click each step — each maps to a pillar you already studied.
+    </p>
+    <p class="lede lang-fa">
+      این همان نتیجهٔ دوره است: یک رشته از درگاه وارد می‌شود و
+      <code>Yar.respond()</code> جریان مونتاژ را اجرا می‌کند.
+      روی هر گام کلیک کنید — هر کدام به ستونی که خوانده‌اید وصل است.
+    </p>
+
+    <div class="callout">
+      <h3 class="lang-en">Scenario</h3>
+      <h3 class="lang-fa">سناریو</h3>
+      <p class="lang-en">
+        User (CLI): <code>Schedule lunch with Alex on Friday at 1pm</code>
+        — Alex already has a semantic fact “prefers afternoon meetings.”
+      </p>
+      <p class="lang-fa">
+        کاربر (CLI): <code>ناهار با الکس را جمعه ساعت ۱ بگذار</code>
+        — از قبل حقیقت معنایی «الکس جلسهٔ بعدازظهر را ترجیح می‌دهد» ذخیره است.
+      </p>
+    </div>
+
+    <h2 class="lang-en">The assembly map</h2>
+    <h2 class="lang-fa">نقشهٔ مونتاژ</h2>
+
+    <figure class="figure">
+      <div class="turn-map">
+        <div class="turn-step is-active" data-turn="1" role="button" tabindex="0">
+          <span class="n">1</span>
+          <div>
+            <strong class="lang-en">Gateway accepts the string</strong>
+            <strong class="lang-fa">درگاه رشته را می‌پذیرد</strong>
+            <p class="lang-en" style="margin:0.25rem 0 0;font-weight:400">CLI reads input; does not reason.</p>
+            <p class="lang-fa" style="margin:0.25rem 0 0;font-weight:400">CLI ورودی را می‌خواند؛ استدلال نمی‌کند.</p>
+          </div>
+          <span class="pillar-tag">Harness</span>
+        </div>
+        <div class="turn-step" data-turn="2" role="button" tabindex="0">
+          <span class="n">2</span>
+          <div>
+            <strong class="lang-en">build_system + gated memory</strong>
+            <strong class="lang-fa">build_system + حافظهٔ دروازه‌دار</strong>
+            <p class="lang-en" style="margin:0.25rem 0 0;font-weight:400">SOUL, clock, gate → maybe FTS, skill match.</p>
+            <p class="lang-fa" style="margin:0.25rem 0 0;font-weight:400">SOUL، ساعت، دروازه ← شاید FTS، جورشدن مهارت.</p>
+          </div>
+          <span class="pillar-tag">Memory</span>
+        </div>
+        <div class="turn-step" data-turn="3" role="button" tabindex="0">
+          <span class="n">3</span>
+          <div>
+            <strong class="lang-en">run_loop reason → act → observe</strong>
+            <strong class="lang-fa">run_loop استدلال ← عمل ← مشاهده</strong>
+            <p class="lang-en" style="margin:0.25rem 0 0;font-weight:400">create_event fires; tool result returns; final reply.</p>
+            <p class="lang-fa" style="margin:0.25rem 0 0;font-weight:400">create_event شلیک می‌شود؛ نتیجه برمی‌گردد؛ پاسخ نهایی.</p>
+          </div>
+          <span class="pillar-tag">Loop</span>
+        </div>
+        <div class="turn-step" data-turn="4" role="button" tabindex="0">
+          <span class="n">4</span>
+          <div>
+            <strong class="lang-en">Persist, consolidate, export</strong>
+            <strong class="lang-fa">ذخیره، تجمیع، خروجی</strong>
+            <p class="lang-en" style="margin:0.25rem 0 0;font-weight:400">History fold-in + maybe consolidation.</p>
+            <p class="lang-fa" style="margin:0.25rem 0 0;font-weight:400">تا کردن تاریخچه + شاید تجمیع.</p>
+          </div>
+          <span class="pillar-tag">Memory</span>
+        </div>
+        <div class="turn-step" data-turn="5" role="button" tabindex="0">
+          <span class="n">5</span>
+          <div>
+            <strong class="lang-en">Trace + return to gateway</strong>
+            <strong class="lang-fa">ردیابی + بازگشت به درگاه</strong>
+            <p class="lang-en" style="margin:0.25rem 0 0;font-weight:400">JSONL events written; CLI prints reply.</p>
+            <p class="lang-fa" style="margin:0.25rem 0 0;font-weight:400">رویداد JSONL نوشته می‌شود؛ CLI پاسخ را چاپ می‌کند.</p>
+          </div>
+          <span class="pillar-tag">Ops + Harness</span>
+        </div>
+      </div>
+
+      <div class="turn-detail is-open" data-turn-detail="1">
+        <p class="lang-en">
+          <code>cli.py</code> calls
+          <code>yar.respond(user_message, observer=_observer, source="cli")</code>.
+          The SPA path is the same entry with <code>source="dashboard"</code>
+          (<a href="./0003-harness-gateway.html">lesson 0003</a>).
+        </p>
+        <p class="lang-fa">
+          <code>cli.py</code> همان <code>respond(..., source="cli")</code> را صدا می‌زند.
+          مسیر SPA با <code>source="dashboard"</code> است.
+        </p>
+        <p class="path">gateway/cli.py → app.Yar.respond()</p>
+      </div>
+      <div class="turn-detail" data-turn-detail="2">
+        <p class="lang-en">
+          <code>Session.build_system</code> loads SOUL + clock + model line, then
+          <code>gated_retrieve</code> (likely <strong>retrieve</strong> for a scheduling question
+          about Alex) and <code>matching_skills</code>. Retrieved text becomes
+          <code>Relevant memory:</code> in the system prompt
+          (<a href="./0004-memory.html">lesson 0004</a>).
+        </p>
+        <p class="lang-fa">
+          <code>build_system</code> سپس دروازه و مهارت‌ها را صدا می‌زند.
+          متن بازیابی‌شده به <code>Relevant memory:</code> تبدیل می‌شود.
+        </p>
+        <p class="path">runtime/session.py · memory.gated_retrieve()</p>
+      </div>
+      <div class="turn-detail" data-turn-detail="3">
+        <p class="lang-en">
+          Working memory list =
+          <code>[system] + history[-window:] + [user]</code>.
+          <code>run_loop</code> reasons, acts with <code>create_event</code>, observes the tool
+          string, then exits on no further tool_calls
+          (<a href="./0002-the-loop.html">lesson 0002</a>).
+          Observer prints live tool lines in the CLI.
+        </p>
+        <p class="lang-fa">
+          <code>run_loop</code> استدلال می‌کند، <code>create_event</code> را اجرا می‌کند، مشاهده می‌کند،
+          و وقتی tool_calls نباشد خارج می‌شود.
+        </p>
+        <p class="path">loop/agent.py · run_loop()</p>
+      </div>
+      <div class="turn-detail" data-turn-detail="4">
+        <p class="lang-en">
+          <code>add_exchange</code> appends user + assistant, folding
+          <code>[tools used: create_event(...)]</code> into history so the model does not
+          re-book next turn (triple-book bug — ARCHITECTURE §3).
+          Then <code>maybe_consolidate</code> may distill facts/episodes if the chat_log threshold
+          is met; <code>export_markdown</code> updates <code>.yar/MEMORY.md</code>.
+        </p>
+        <p class="lang-fa">
+          <code>add_exchange</code> تاریخچه را با خط <code>[tools used: …]</code> به‌روز می‌کند؛
+          بعد شاید تجمیع و خروجی مارک‌داون.
+        </p>
+        <p class="path">session.add_exchange · memory.maybe_consolidate</p>
+      </div>
+      <div class="turn-detail" data-turn-detail="5">
+        <p class="lang-en">
+          <code>Tracer</code> has been recording via <code>compose(observer, tracer.event, …)</code>
+          all along — JSONL under <code>.yar/traces/</code>
+          (<a href="./0005-eval-ops.html">lesson 0005</a>).
+          <code>respond</code> returns <code>LoopResult</code>; the gateway prints
+          <code>result.reply</code>. Offline, <code>make gate</code> would check whether
+          <code>create_event</code> fired with the expected args for a twin case in
+          <code>dataset.jsonl</code>.
+        </p>
+        <p class="lang-fa">
+          Tracer از ابتدا JSONL می‌نوشته؛ درگاه <code>result.reply</code> را چاپ می‌کند.
+          آفلاین، <code>make gate</code> همان ابزار را در دیتاست چک می‌کند.
+        </p>
+        <p class="path">ops/tracing.py · return LoopResult</p>
+      </div>
+
+      <figcaption>
+        <span class="lang-en">Figure 1 — Same assembly as ARCHITECTURE.md §1 / <code>app.py</code>.</span>
+        <span class="lang-fa">شکل ۱ — همان مونتاژ ARCHITECTURE.md §۱ / <code>app.py</code>.</span>
+      </figcaption>
+    </figure>
+
+    <h2 class="lang-en">Real code — the whole turn</h2>
+    <h2 class="lang-fa">کد واقعی — کل نوبت</h2>
+
+    <pre class="code"><code><span class="c"># backend/yar/app.py — respond() core</span>
+<span class="k">with</span> self.tracer.turn(user_message):
+    system = self.session.build_system(user_message, notify=notify)
+    messages = (
+        [{"role": "system", "content": system}]
+        + self.session.history[-window:]
+        + [{"role": "user", "content": user_message}]
+    )
+    result = run_loop(..., messages=messages, tools=self.tools, observer=notify)
+    self.session.add_exchange(user_message, result.reply, tool_calls=..., source=source, meta=meta)
+    self.memory.maybe_consolidate(notify=notify)
+    self.memory.export_markdown()
+<span class="k">return</span> result</code></pre>
+
+    <h2 class="lang-en">Check yourself</h2>
+    <h2 class="lang-fa">خودتان را بیازمایید</h2>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="c"
+      data-ok-en="Yes — gate + skills run while assembling the system prompt."
+      data-ok-fa="بله — دروازه و مهارت‌ها هنگام ساخت system prompt اجرا می‌شوند."
+      data-bad-en="Hint: gated_retrieve is inside build_system, before run_loop."
+      data-bad-fa="راهنما: gated_retrieve داخل build_system است، قبل از run_loop."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">1. When does the retrieval gate run in a turn?</span>
+        <span class="lang-fa">۱. دروازهٔ بازیابی در یک نوبت کی اجرا می‌شود؟</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Only after make gate finishes scoring</span>
+          <span class="lang-fa">فقط بعد از اتمام امتیازدهی make gate</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Inside run_loop after max_iterations</span>
+          <span class="lang-fa">داخل run_loop بعد از max_iterations</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">During build_system, before the loop</span>
+          <span class="lang-fa">هنگام build_system، قبل از حلقه</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Only when the CLI runs /memory</span>
+          <span class="lang-fa">فقط وقتی CLI دستور /memory را بزند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="b"
+      data-ok-en="Right — fold-in stops the model from re-firing the same tool."
+      data-ok-fa="درست — تا کردن جلوی شلیک دوبارهٔ همان ابزار را می‌گیرد."
+      data-bad-en="Hint: ARCHITECTURE §3 triple-book regression."
+      data-bad-fa="راهنما: رگرسیون triple-book در ARCHITECTURE §۳."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">2. Why fold [tools used: …] into assistant history?</span>
+        <span class="lang-fa">۲. چرا [tools used: …] را در تاریخچهٔ assistant تا می‌کنیم؟</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">So FTS5 can index tool JSON blobs</span>
+          <span class="lang-fa">تا FTS5 بتواند JSON ابزار را ایندکس کند</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">So the model won’t re-book the same event</span>
+          <span class="lang-fa">تا مدل همان رویداد را دوباره رزرو نکند</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">So the SPA can skip VITE_API_BASE_URL</span>
+          <span class="lang-fa">تا SPA بتواند VITE_API_BASE_URL را رد کند</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">So judge evals replace deterministic ones</span>
+          <span class="lang-fa">تا ارزیابی داور جایگزین قطعی شود</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="a"
+      data-ok-en="Exactly — respond wires all four; evals also run offline via make gate."
+      data-ok-fa="دقیق — respond هر چهار را سیم می‌کند؛ ارزیابی آفلاین هم با make gate است."
+      data-bad-en="Hint: Tracer is in the hot path; pytest suites are the release gate."
+      data-bad-fa="راهنما: Tracer در مسیر داغ است؛ سوئیت‌های pytest دروازهٔ انتشارند."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">3. Which statement about Eval / Ops is true?</span>
+        <span class="lang-fa">۳. کدام گزاره دربارهٔ ارزیابی / عملیات درست است؟</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Tracing runs each turn; make gate is offline</span>
+          <span class="lang-fa">ردیابی هر نوبت؛ make gate آفلاین است</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">make gate must run inside run_loop itself</span>
+          <span class="lang-fa">make gate باید داخل خود run_loop اجرا شود</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Judge scores replace JSONL on every tool</span>
+          <span class="lang-fa">امتیاز داور جایگزین JSONL در هر ابزار می‌شود</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Harness owns consolidate_if_due always</span>
+          <span class="lang-fa">درگاه همیشه مالک consolidate_if_due است</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="callout primary">
+      <h3 class="lang-en">Primary source</h3>
+      <h3 class="lang-fa">منبع اصلی</h3>
+      <p class="lang-en">
+        Read <code>backend/yar/app.py</code> (<code>respond</code>) top to bottom, with
+        <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §1</a> open beside it.
+        Keep <a href="../reference/one-turn-cheatsheet.html">the one-turn cheat sheet</a> for review.
+        For the industry “keep it simple” framing, revisit
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>.
+      </p>
+      <p class="lang-fa">
+        <code>app.py</code> (<code>respond</code>) را سر تا ته با
+        <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §۱</a> بخوانید.
+        <a href="../reference/one-turn-cheatsheet.html">برگهٔ تقلب یک نوبت</a> را نگه دارید.
+      </p>
+    </div>
+
+    <nav class="nav-links">
+      <a href="./0005-eval-ops.html">
+        <span class="lang-en">← 0005 Eval / Ops</span>
+        <span class="lang-fa">← ۰۰۰۵ ارزیابی</span>
+      </a>
+      <a href="./0001-four-pillars.html">
+        <span class="lang-en">Back to 0001 pillars</span>
+        <span class="lang-fa">بازگشت به ۰۰۰۱ ستون‌ها</span>
+      </a>
+      <a href="../reference/one-turn-cheatsheet.html">
+        <span class="lang-en">Reference: one turn</span>
+        <span class="lang-fa">مرجع: یک نوبت</span>
+      </a>
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Citations: Yar app.py + ARCHITECTURE §1–3; Anthropic (2024) via RESOURCES.md</span>
+    <span class="lang-fa">استنادها: app.py و معماری یار؛ Anthropic (۲۰۲۴)</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+  <script src="../assets/quiz.js"></script>
+  <script src="../assets/turn.js"></script>
+</body>
+</html>

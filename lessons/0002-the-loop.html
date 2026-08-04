@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0002 — The Loop | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/loop.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Lesson 0002 · The Loop</span>
+      <span class="brand-sub lang-fa">درس ۰۰۰۲ · حلقه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Lesson 0002</span>
+      <span class="lang-en">~15 minutes · after
+        <a href="./0001-four-pillars.html">0001</a></span>
+      <span class="lang-fa">حدود ۱۵ دقیقه · بعد از
+        <a href="./0001-four-pillars.html">۰۰۰۱</a></span>
+    </div>
+
+    <h1 class="lang-en">The loop is the whole trick</h1>
+    <h1 class="lang-fa">حلقه همان کل ترفند است</h1>
+
+    <p class="lede lang-en">
+      Frameworks add indirection. Underneath, every agent turn is
+      <strong>reason → act → observe</strong> with two exits. Yar keeps that in
+      ~95 lines: <code>backend/yar/loop/agent.py</code>.
+    </p>
+    <p class="lede lang-fa">
+      فریم‌ورک‌ها لایه اضافه می‌کنند. زیرشان، هر نوبت عامل
+      <strong>استدلال ← عمل ← مشاهده</strong> است با دو خروجی. یار همان را در حدود ۹۵ خط نگه می‌دارد.
+    </p>
+
+    <h2 class="lang-en">Three beats, two exits</h2>
+    <h2 class="lang-fa">سه ضرب، دو خروج</h2>
+
+    <p class="lang-en">
+      Anthropic: agents are typically “LLMs using tools based on environmental feedback in a loop,”
+      with stopping conditions such as a maximum number of iterations
+      (<a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>).
+      Yar names the same structure explicitly
+      (<a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §3</a>):
+    </p>
+    <p class="lang-fa">
+      Anthropic می‌گوید عامل‌ها معمولاً مدل‌هایی‌اند که با بازخورد محیط در حلقه از ابزار استفاده می‌کنند،
+      با شرط توقف مثل سقف تکرار. یار همان ساختار را صریح نام می‌برد:
+    </p>
+
+    <figure class="figure">
+      <div class="loop-diagram">
+        <div class="loop-step">
+          <span class="n">1</span>
+          <div>
+            <strong class="lang-en">Reason</strong>
+            <strong class="lang-fa">استدلال</strong>
+            <span class="lang-en">One <code>chat.completions</code> call with current <code>messages</code> + tool schemas.</span>
+            <span class="lang-fa">یک فراخوانی <code>chat.completions</code> با <code>messages</code> فعلی و schema ابزارها.</span>
+          </div>
+        </div>
+        <div class="loop-step">
+          <span class="n">2</span>
+          <div>
+            <strong class="lang-en">Act</strong>
+            <strong class="lang-fa">عمل</strong>
+            <span class="lang-en">If the model requested tools, <em>your</em> code runs <code>tools.execute(...)</code>.</span>
+            <span class="lang-fa">اگر مدل ابزار خواست، <em>کد شما</em> <code>tools.execute(...)</code> را اجرا می‌کند.</span>
+          </div>
+        </div>
+        <div class="loop-step">
+          <span class="n">3</span>
+          <div>
+            <strong class="lang-en">Observe</strong>
+            <strong class="lang-fa">مشاهده</strong>
+            <span class="lang-en">Append <code>role: tool</code> results to <code>messages</code>, then loop.</span>
+            <span class="lang-fa">نتیجه را با <code>role: tool</code> به <code>messages</code> بچسبان، بعد دوباره حلقه.</span>
+          </div>
+        </div>
+        <div class="loop-step is-exit">
+          <span class="n">⎋</span>
+          <div>
+            <strong class="lang-en">Guardrails</strong>
+            <strong class="lang-fa">حفاظ‌ها</strong>
+            <span class="lang-en">(1) no <code>tool_calls</code> → reply to the human · (2) <code>max_iterations</code> → hard stop.</span>
+            <span class="lang-fa">(۱) بدون <code>tool_calls</code> → پاسخ به انسان · (۲) <code>max_iterations</code> → توقف سخت.</span>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="lang-en">Figure 1 — Same skeleton as the docstring at the top of <code>agent.py</code>.</span>
+        <span class="lang-fa">شکل ۱ — همان اسکلت docstring بالای <code>agent.py</code>.</span>
+      </figcaption>
+    </figure>
+
+    <h2 class="lang-en">Skill: walk one turn</h2>
+    <h2 class="lang-fa">مهارت: یک نوبت را قدم‌به‌قدم بروید</h2>
+
+    <p class="lang-en">
+      Press <strong>Next step</strong> and watch <code>messages</code> grow. This is what gets traced —
+      Yar mutates the list in place (<a href="../docs/ARCHITECTURE.md">§3</a>).
+    </p>
+    <p class="lang-fa">
+      <strong>گام بعد</strong> را بزنید و رشد <code>messages</code> را ببینید. همان چیزی است که ردیابی می‌شود —
+      یار لیست را درجا عوض می‌کند.
+    </p>
+
+    <div class="sim" data-loop-sim>
+      <div class="sim-toolbar">
+        <button type="button" data-sim-prev>
+          <span class="lang-en">Back</span>
+          <span class="lang-fa">قبلی</span>
+        </button>
+        <button type="button" class="primary" data-sim-next>
+          <span class="lang-en">Next step</span>
+          <span class="lang-fa">گام بعد</span>
+        </button>
+        <button type="button" data-sim-reset>
+          <span class="lang-en">Reset</span>
+          <span class="lang-fa">از نو</span>
+        </button>
+        <span class="sim-meta" data-sim-meta></span>
+      </div>
+      <div class="sim-stage">
+        <div class="sim-panel">
+          <h4 class="lang-en">messages (working memory)</h4>
+          <h4 class="lang-fa">messages (حافظهٔ کاری)</h4>
+          <ul data-sim-messages></ul>
+        </div>
+        <div class="sim-panel">
+          <h4 class="lang-en">this beat</h4>
+          <h4 class="lang-fa">این ضرب</h4>
+          <p data-sim-model style="font-family: var(--font-mono); font-size: 0.82rem; margin: 0;"></p>
+        </div>
+        <div class="sim-narration" data-sim-narration></div>
+      </div>
+    </div>
+
+    <h2 class="lang-en">Real code</h2>
+    <h2 class="lang-fa">کد واقعی</h2>
+
+    <p class="lang-en">From <code>run_loop</code> in <code>backend/yar/loop/agent.py</code> (abbreviated):</p>
+    <p class="lang-fa">از <code>run_loop</code> در <code>backend/yar/loop/agent.py</code> (خلاصه):</p>
+
+    <pre class="code"><code><span class="k">for</span> iteration <span class="k">in</span> range(1, max_iterations + 1):
+    response = completions.create(model=model, messages=messages, tools=...)
+    messages.append(_assistant_message(message))
+    tool_calls = list(message.tool_calls <span class="k">or</span> [])
+
+    <span class="c"># guardrail 1: model is talking to the human</span>
+    <span class="k">if not</span> tool_calls:
+        result.reply = message.content <span class="k">or</span> ""
+        <span class="k">return</span> result
+
+    <span class="c"># act + observe</span>
+    <span class="k">for</span> call <span class="k">in</span> tool_calls:
+        output = tools.execute(call.function.name, args)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": call.id,
+            "content": output,
+        })
+
+<span class="c"># guardrail 2: ran out of iterations</span></code></pre>
+
+    <div class="callout">
+      <h3 class="lang-en">What the loop deliberately is not</h3>
+      <h3 class="lang-fa">حلقه عمداً چه چیزی نیست</h3>
+      <p class="lang-en">
+        It does not load SOUL.md, search memory, or write traces. Those sit in Session / Memory / Tracer.
+        An <code>Observer</code> callback lets the gateway and ops watch events without owning the loop
+        (<a href="../docs/ARCHITECTURE.md">§3</a>). That separation is the point of the four pillars.
+      </p>
+      <p class="lang-fa">
+        حلقه SOUL را بار نمی‌کند، حافظه را جستجو نمی‌کند، و ردیابی نمی‌نویسد. آن‌ها در Session / Memory / Tracerاند.
+        <code>Observer</code> فقط تماشا می‌کند — بدون مالک شدن حلقه.
+      </p>
+    </div>
+
+    <h2 class="lang-en">Check yourself</h2>
+    <h2 class="lang-fa">خودتان را بیازمایید</h2>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="b"
+      data-ok-en="Yes — your process runs the tool; the model only requested it."
+      data-ok-fa="بله — فرایند شما ابزار را اجرا می‌کند؛ مدل فقط درخواست داده."
+      data-bad-en="Hint: act is code you own, not another LLM call."
+      data-bad-fa="راهنما: عمل مال کد شماست، نه یک فراخوانی مدل دیگر."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">1. Who executes create_event after a tool_call?</span>
+        <span class="lang-fa">۱. بعد از tool_call چه کسی create_event را اجرا می‌کند؟</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">The model runs it inside the API host</span>
+          <span class="lang-fa">مدل آن را داخل میزبان API اجرا می‌کند</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Your tools.execute in the agent host</span>
+          <span class="lang-fa">tools.execute شما روی میزبان عامل</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">The Tracer writes it into JSONL only</span>
+          <span class="lang-fa">فقط Tracer آن را در JSONL می‌نویسد</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">The SPA gateway schedules the event</span>
+          <span class="lang-fa">درگاه SPA خودش رویداد را زمان‌بندی می‌کند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="c"
+      data-ok-en="Correct — empty tool_calls means the model is done talking to tools."
+      data-ok-fa="درست — tool_calls خالی یعنی مدل دیگر با ابزار حرف نمی‌زند."
+      data-bad-en="Hint: guardrail 1 is the natural end of turn."
+      data-bad-fa="راهنما: حفاظ ۱ همان پایان طبیعی نوبت است."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">2. Natural end of a Yar turn happens when…</span>
+        <span class="lang-fa">۲. پایان طبیعی یک نوبت یار وقتی است که…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Consolidation finishes writing facts</span>
+          <span class="lang-fa">تجمیع نوشتن حقایق را تمام کند</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">The CLI process receives SIGTERM</span>
+          <span class="lang-fa">فرایند CLI سیگنال SIGTERM بگیرد</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">The model returns no tool_calls</span>
+          <span class="lang-fa">مدل هیچ tool_calls برنگرداند</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">FTS5 returns zero memory hits</span>
+          <span class="lang-fa">FTS5 صفر نتیجه حافظه برگرداند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="a"
+      data-ok-en="Right — max_iterations is the hard stop so the loop cannot spin forever."
+      data-ok-fa="درست — max_iterations توقف سخت است تا حلقه ابدی نشود."
+      data-bad-en="Hint: Anthropic and Yar both stress an iteration ceiling."
+      data-bad-fa="راهنما: هم Anthropic و هم یار روی سقف تکرار تأکید دارند."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">3. Why does run_loop take max_iterations?</span>
+        <span class="lang-fa">۳. چرا run_loop پارامتر max_iterations دارد؟</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Hard stop so the loop cannot spin</span>
+          <span class="lang-fa">توقف سخت تا حلقه نچرخد بی‌پایان</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">It sets how many facts FTS returns</span>
+          <span class="lang-fa">تعداد حقایق برگشتی FTS را مشخص می‌کند</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">It caps tokens on one completion</span>
+          <span class="lang-fa">توکن یک completion را سقف می‌گذارد</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">It limits open browser SPA tabs</span>
+          <span class="lang-fa">تعداد تب باز SPA را محدود می‌کند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="callout primary">
+      <h3 class="lang-en">Primary source</h3>
+      <h3 class="lang-fa">منبع اصلی</h3>
+      <p class="lang-en">
+        Read the “Agents” section in
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>,
+        then open <code>backend/yar/loop/agent.py</code> and match each comment block to a beat above.
+        Keep <a href="../reference/loop-cheatsheet.html">the cheat sheet</a> nearby.
+      </p>
+      <p class="lang-fa">
+        بخش Agents در
+        <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>
+        را بخوانید، بعد <code>agent.py</code> را باز کنید و هر بلوک توضیح را با ضرب‌های بالا جور کنید.
+        <a href="../reference/loop-cheatsheet.html">برگهٔ تقلب</a> را کنار دست بگذارید.
+      </p>
+    </div>
+
+    <nav class="nav-links">
+      <a href="./0001-four-pillars.html">
+        <span class="lang-en">← 0001 Four pillars</span>
+        <span class="lang-fa">← ۰۰۰۱ چهار ستون</span>
+      </a>
+      <a href="../reference/loop-cheatsheet.html">
+        <span class="lang-en">Reference: loop cheat sheet</span>
+        <span class="lang-fa">مرجع: برگهٔ تقلب حلقه</span>
+      </a>
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+      <span class="lang-en">Next up: <a href="./0003-harness-gateway.html">0003 — Harness</a></span>
+      <span class="lang-fa">درس بعد: <a href="./0003-harness-gateway.html">۰۰۰۳ — درگاه</a></span>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Citations: Anthropic (2024); Yar agent.py + ARCHITECTURE.md §3</span>
+    <span class="lang-fa">استنادها: Anthropic (۲۰۲۴)؛ agent.py و ARCHITECTURE.md §۳ یار</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+  <script src="../assets/quiz.js"></script>
+  <script src="../assets/loop-sim.js"></script>
+</body>
+</html>

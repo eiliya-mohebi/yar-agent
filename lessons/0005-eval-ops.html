@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0005 — Eval / LLM-Ops | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/eval.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Lesson 0005 · Eval / Ops</span>
+      <span class="brand-sub lang-fa">درس ۰۰۰۵ · ارزیابی / عملیات</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Lesson 0005</span>
+      <span class="lang-en">~15 minutes · after
+        <a href="./0004-memory.html">0004</a></span>
+      <span class="lang-fa">حدود ۱۵ دقیقه · بعد از
+        <a href="./0004-memory.html">۰۰۰۴</a></span>
+    </div>
+
+    <h1 class="lang-en">Eval tells you if the change helped</h1>
+    <h1 class="lang-fa">ارزیابی می‌گوید تغییر کمکتان کرده یا نه</h1>
+
+    <p class="lede lang-en">
+      Harness, Loop, and Memory can all look fine in a demo and still regress tomorrow.
+      The fourth pillar is how you <em>know</em>: traces you can read, checks that are 0/1,
+      quality scores that stay separate, and a release gate before you ship
+      (<a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §8</a>).
+    </p>
+    <p class="lede lang-fa">
+      درگاه، حلقه و حافظه ممکن است در دمو خوب به نظر برسند و فردا پسرفت کنند.
+      ستون چهارم یعنی <em>بدانید</em>: ردیابی خوانا، چک‌های ۰/۱، امتیاز کیفیت جدا، و دروازهٔ انتشار.
+    </p>
+
+    <h2 class="lang-en">Never mix the two suites</h2>
+    <h2 class="lang-fa">هرگز دو سوئیت را مخلوط نکنید</h2>
+
+    <p class="lang-en">
+      Industry eval platforms draw the same line: code/heuristic checks vs LLM-as-judge
+      (<a href="https://docs.langchain.com/langsmith/evaluation-types">LangSmith evaluation types</a>).
+      Yar’s design rule is absolute: deterministic = unit test; judge = scored opinion.
+      Mixing them in one assertion confuses both signals.
+    </p>
+    <p class="lang-fa">
+      پلتفرم‌های صنعتی همان خط را می‌کشند: چک کد/هیوریستیک در برابر داورِ مدل.
+      قانون یار مطلق است: قطعی = تست واحد؛ داور = نظر امتیازدار.
+    </p>
+
+    <figure class="figure">
+      <div class="eval-split">
+        <div class="eval-card">
+          <h3 class="lang-en">Deterministic</h3>
+          <h3 class="lang-fa">قطعی</h3>
+          <p class="lang-en"><strong>Question:</strong> Did the right tool fire (with the right args)?</p>
+          <p class="lang-fa"><strong>سؤال:</strong> آیا ابزار درست (با آرگومان درست) شلیک شد؟</p>
+          <p class="lang-en"><strong>Score:</strong> 0/1 pass-fail (pytest)</p>
+          <p class="lang-fa"><strong>امتیاز:</strong> ۰/۱ قبول/رد (pytest)</p>
+          <p class="lang-en"><strong>Run:</strong> <code>make eval</code></p>
+          <p class="lang-fa"><strong>اجرا:</strong> <code>make eval</code></p>
+          <p class="path">evals/deterministic/ + ops/scoring.py</p>
+        </div>
+        <div class="eval-card warn-edge">
+          <h3 class="lang-en">Judge</h3>
+          <h3 class="lang-fa">داور</h3>
+          <p class="lang-en"><strong>Question:</strong> Was the reply helpful / high quality?</p>
+          <p class="lang-fa"><strong>سؤال:</strong> آیا پاسخ مفید / باکیفیت بود؟</p>
+          <p class="lang-en"><strong>Score:</strong> 0–1 via DeepEval GEval (threshold 0.6)</p>
+          <p class="lang-fa"><strong>امتیاز:</strong> ۰–۱ با DeepEval GEval (آستانه ۰٫۶)</p>
+          <p class="lang-en"><strong>Run:</strong> <code>make eval-judge</code> (needs key)</p>
+          <p class="lang-fa"><strong>اجرا:</strong> <code>make eval-judge</code> (نیاز به کلید)</p>
+          <p class="path">evals/judge/</p>
+        </div>
+      </div>
+      <figcaption>
+        <span class="lang-en">Figure 1 — Same table as ARCHITECTURE.md §8 “Evals — never mixed”.</span>
+        <span class="lang-fa">شکل ۱ — همان جدول «ارزیابی‌ها — هرگز مخلوط نشوند».</span>
+      </figcaption>
+    </figure>
+
+    <h2 class="lang-en">The dataset contract</h2>
+    <h2 class="lang-fa">قرارداد دیتاست</h2>
+
+    <p class="lang-en">
+      Cases live in <code>evals/dataset.jsonl</code>. One scorer —
+      <code>ops/scoring.py</code> — powers the offline battery, shootout, and Compare arena
+      so numbers cannot drift apart:
+    </p>
+    <p class="lang-fa">
+      کیس‌ها در <code>evals/dataset.jsonl</code>اند. یک scorer —
+      <code>ops/scoring.py</code> — باتری آفلاین، shootout و Compare را تغذیه می‌کند:
+    </p>
+
+    <pre class="code"><code><span class="c"># one line of dataset.jsonl (shape from ARCHITECTURE §8)</span>
+{
+  "id": "schedule-basic",
+  "input": "Schedule a coffee with Alex next Tuesday at 9am",
+  "expect_tool": "create_event",
+  "expect_in_args": {"title": "alex", "start": "T09:00"}
+}
+
+<span class="c"># expect_tool: null  → pass only if NO tools fired</span>
+<span class="c"># Persian twin: schedule-basic-fa  (bilingual gate)</span></code></pre>
+
+    <pre class="code"><code><span class="c"># ops/scoring.py — check_case (idea)</span>
+<span class="k">if</span> case.get("expect_tool") <span class="k">is</span> None:
+    <span class="k">return</span> (not fired, ...)
+<span class="k">if</span> case["expect_tool"] <span class="k">not in</span> fired:
+    <span class="k">return</span> (False, ...)
+<span class="c"># each expect_in_args value = case-insensitive substring of that arg</span></code></pre>
+
+    <h2 class="lang-en">Skill: which suite?</h2>
+    <h2 class="lang-fa">مهارت: کدام سوئیت؟</h2>
+
+    <div class="figure suite-pick">
+      <div
+        class="suite-item"
+        data-suite
+        data-answer="det"
+        data-ok-en="Deterministic — right tool + args is a 0/1 outcome check."
+        data-ok-fa="قطعی — ابزار و آرگومان درست یک چک ۰/۱ است."
+        data-bad-en="That is Completion scoring, not vibe quality."
+        data-bad-fa="این امتیاز Completion است، نه کیفیت حسی."
+      >
+        <p class="q lang-en">“Did create_event fire with start containing T09:00?”</p>
+        <p class="q lang-fa">«آیا create_event با start شامل T09:00 شلیک شد؟»</p>
+        <div class="choices">
+          <button type="button" data-pick="det">
+            <span class="lang-en">Deterministic</span><span class="lang-fa">قطعی</span>
+          </button>
+          <button type="button" data-pick="judge">
+            <span class="lang-en">Judge</span><span class="lang-fa">داور</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="suite-item"
+        data-suite
+        data-answer="judge"
+        data-ok-en="Judge — helpfulness/tone needs a scored rubric, not a substring."
+        data-ok-fa="داور — مفیدبودن/لحن به روبریک امتیازدار نیاز دارد."
+        data-bad-en="No exact tool string can prove ‘warm and clear’."
+        data-bad-fa="هیچ رشتهٔ ابزاری «گرم و واضح» را ثابت نمی‌کند."
+      >
+        <p class="q lang-en">“Was the Persian reply warm and clear?”</p>
+        <p class="q lang-fa">«آیا پاسخ فارسی گرم و واضح بود؟»</p>
+        <div class="choices">
+          <button type="button" data-pick="det">
+            <span class="lang-en">Deterministic</span><span class="lang-fa">قطعی</span>
+          </button>
+          <button type="button" data-pick="judge">
+            <span class="lang-en">Judge</span><span class="lang-fa">داور</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+
+      <div
+        class="suite-item"
+        data-suite
+        data-answer="det"
+        data-ok-en="Deterministic — expect_tool null means assert zero tools."
+        data-ok-fa="قطعی — expect_tool تهی یعنی ادعای صفر ابزار."
+        data-bad-en="‘No tool’ is still a hard outcome, not a quality score."
+        data-bad-fa="«بدون ابزار» هنوز یک نتیجهٔ سخت است، نه امتیاز کیفیت."
+      >
+        <p class="q lang-en">“Capital of France?” should call no tools</p>
+        <p class="q lang-fa">«پایتخت فرانسه؟» نباید ابزاری صدا بزند</p>
+        <div class="choices">
+          <button type="button" data-pick="det">
+            <span class="lang-en">Deterministic</span><span class="lang-fa">قطعی</span>
+          </button>
+          <button type="button" data-pick="judge">
+            <span class="lang-en">Judge</span><span class="lang-fa">داور</span>
+          </button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <h2 class="lang-en">Tracing — always on</h2>
+    <h2 class="lang-fa">ردیابی — همیشه روشن</h2>
+
+    <p class="lang-en">
+      Every turn appends readable JSONL under <code>.yar/traces/</code> — “what happened, in order”
+      with zero required deps (<code>ops/tracing.py</code>). Optional OTel when
+      <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> is set (Phoenix / Langfuse).
+      The same <code>Observer</code> the gateway uses also feeds the tracer
+      (<a href="./0003-harness-gateway.html">lesson 0003</a>).
+    </p>
+    <p class="lang-fa">
+      هر نوبت JSONL خوانا زیر <code>.yar/traces/</code> می‌نویسد — بدون وابستگی اجباری.
+      OTel اختیاری است. همان <code>Observer</code> درگاه، Tracer را هم تغذیه می‌کند.
+    </p>
+
+    <h2 class="lang-en">The release gate</h2>
+    <h2 class="lang-fa">دروازهٔ انتشار</h2>
+
+    <figure class="figure">
+      <div class="ops-flow">
+        <span>make gate</span><span class="arrow">→</span>
+        <span>deterministic 100%</span><span class="arrow">→</span>
+        <span>judge (if key)</span><span class="arrow">→</span>
+        <span class="gate-open">GATE OPEN</span>
+      </div>
+      <figcaption>
+        <span class="lang-en">Figure 2 — Any deterministic failure → <code>GATE CLOSED</code> immediately.</span>
+        <span class="lang-fa">شکل ۲ — هر شکست قطعی → فوری <code>GATE CLOSED</code>.</span>
+      </figcaption>
+    </figure>
+
+    <pre class="code"><code><span class="c"># ops/release_gate.py — main() (abbreviated)</span>
+code, suites["deterministic"] = run("deterministic")
+<span class="k">if</span> code:
+    report("fail", "not run", suites)
+    print("GATE CLOSED — deterministic evals failed.")
+    sys.exit(1)
+
+<span class="k">if</span> settings.api_key.strip():
+    code, suites["judge"] = run("judge")
+    <span class="k">if</span> code:
+        report("pass", "fail", suites)
+        sys.exit(1)
+    report("pass", "pass", suites)
+<span class="k">else</span>:
+    report("pass", "skipped", suites)
+
+print("GATE OPEN — safe to release.")</code></pre>
+
+    <p class="lang-en">
+      Project rule: when you find a live bug, fix it <strong>and</strong> add a deterministic
+      regression case (often with a Persian <code>-fa</code> twin).
+    </p>
+    <p class="lang-fa">
+      قانون پروژه: باگ زنده را درست کنید <strong>و</strong> یک کیس رگرسیون قطعی اضافه کنید
+      (اغلب با جفت فارسی <code>-fa</code>).
+    </p>
+
+    <h2 class="lang-en">Check yourself</h2>
+    <h2 class="lang-fa">خودتان را بیازمایید</h2>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="b"
+      data-ok-en="Yes — one failure blocks; deterministic is the hard gate."
+      data-ok-fa="بله — یک شکست کافی است؛ قطعی دروازهٔ سخت است."
+      data-bad-en="Hint: read GATE CLOSED in release_gate.py."
+      data-bad-fa="راهنما: GATE CLOSED را در release_gate.py بخوانید."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">1. One deterministic test fails. make gate…</span>
+        <span class="lang-fa">۱. یک تست قطعی شکست می‌خورد. make gate…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Skips it and still runs the judge</span>
+          <span class="lang-fa">رد می‌کند و باز هم داور را اجرا می‌کند</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Exits closed without requiring judge</span>
+          <span class="lang-fa">بسته خارج می‌شود بدون نیاز به داور</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">Deletes .yar/traces and continues</span>
+          <span class="lang-fa">ردیابی‌ها را پاک می‌کند و ادامه می‌دهد</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Opens the SPA on port 6006 only</span>
+          <span class="lang-fa">فقط SPA را روی پورت ۶۰۰۶ باز می‌کند</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="c"
+      data-ok-en="Correct — JSONL tracing needs no extra deps."
+      data-ok-fa="درست — ردیابی JSONL به وابستگی اضافه نیاز ندارد."
+      data-bad-en="Hint: OTel is optional; JSONL is always on."
+      data-bad-fa="راهنما: OTel اختیاری است؛ JSONL همیشه روشن است."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">2. Default observability without extras is…</span>
+        <span class="lang-fa">۲. مشاهده‌پذیری پیش‌فرض بدون extras همان…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">Phoenix on :6006 required always</span>
+          <span class="lang-fa">Phoenix روی :۶۰۰۶ همیشه اجباری است</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">Only DeepEval scores in SQLite</span>
+          <span class="lang-fa">فقط امتیازهای DeepEval در SQLite</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">JSONL lines under .yar/traces/</span>
+          <span class="lang-fa">خطوط JSONL زیر .yar/traces/</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">Telegram webhook delivery receipts</span>
+          <span class="lang-fa">رسید تحویل وبهوک تلگرام</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div
+      class="quiz"
+      data-quiz
+      data-answer="a"
+      data-ok-en="Right — never put a judge assertion in the deterministic suite."
+      data-ok-fa="درست — ادعای داور را داخل سوئیت قطعی نگذارید."
+      data-bad-en="Hint: ARCHITECTURE §8 — never mixed."
+      data-bad-fa="راهنما: ARCHITECTURE §۸ — هرگز مخلوط نشوند."
+    >
+      <div class="quiz-q">
+        <span class="lang-en">3. Adding “reply must feel empathetic” belongs in…</span>
+        <span class="lang-fa">۳. افزودن «پاسخ باید همدلانه حس شود» متعلق به…</span>
+      </div>
+      <div class="quiz-options">
+        <button type="button" data-choice="a">
+          <span class="lang-en">The judge suite, not deterministic</span>
+          <span class="lang-fa">سوئیت داور، نه سوئیت قطعی</span>
+        </button>
+        <button type="button" data-choice="b">
+          <span class="lang-en">dataset.jsonl expect_in_args only</span>
+          <span class="lang-fa">فقط expect_in_args در dataset.jsonl</span>
+        </button>
+        <button type="button" data-choice="c">
+          <span class="lang-en">The CLI /memory slash command</span>
+          <span class="lang-fa">دستور اسلش /memory در CLI</span>
+        </button>
+        <button type="button" data-choice="d">
+          <span class="lang-en">FTS5 trigger DDL for facts_fts</span>
+          <span class="lang-fa">DDL تریگر FTS5 برای facts_fts</span>
+        </button>
+      </div>
+      <div class="quiz-feedback" aria-live="polite"></div>
+    </div>
+
+    <div class="callout primary">
+      <h3 class="lang-en">Primary source</h3>
+      <h3 class="lang-fa">منبع اصلی</h3>
+      <p class="lang-en">
+        Read <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §8</a>, then
+        <code>ops/release_gate.py</code> and <code>ops/scoring.py</code>.
+        Industry framing:
+        <a href="https://docs.langchain.com/langsmith/evaluation-types">LangSmith evaluation types</a>
+        (code evaluators vs LLM-as-judge).
+        Keep <a href="../reference/eval-cheatsheet.html">the eval cheat sheet</a> open.
+      </p>
+      <p class="lang-fa">
+        <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §۸</a>، بعد
+        <code>release_gate.py</code> و <code>scoring.py</code> را بخوانید.
+        چارچوب صنعتی:
+        <a href="https://docs.langchain.com/langsmith/evaluation-types">انواع ارزیابی LangSmith</a>.
+        <a href="../reference/eval-cheatsheet.html">برگهٔ تقلب ارزیابی</a> را باز بگذارید.
+      </p>
+    </div>
+
+    <nav class="nav-links">
+      <a href="./0004-memory.html">
+        <span class="lang-en">← 0004 Memory</span>
+        <span class="lang-fa">← ۰۰۰۴ حافظه</span>
+      </a>
+      <a href="../reference/eval-cheatsheet.html">
+        <span class="lang-en">Reference: eval / ops</span>
+        <span class="lang-fa">مرجع: ارزیابی / عملیات</span>
+      </a>
+      <a href="../reference/four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+      <span class="lang-en">Next up: <a href="./0006-one-full-turn.html">0006 — One full turn</a></span>
+      <span class="lang-fa">درس بعد: <a href="./0006-one-full-turn.html">۰۰۰۶ — یک نوبت کامل</a></span>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Citations: Yar ARCHITECTURE §8; release_gate.py; LangSmith evaluation types via RESOURCES.md</span>
+    <span class="lang-fa">استنادها: معماری یار §۸؛ release_gate.py؛ انواع ارزیابی LangSmith</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+  <script src="../assets/quiz.js"></script>
+  <script src="../assets/suite-drill.js"></script>
+</body>
+</html>

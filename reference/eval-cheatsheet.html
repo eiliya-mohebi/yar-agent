@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reference — Eval / Ops | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <link rel="stylesheet" href="../assets/eval.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="../lessons/0005-eval-ops.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Reference · Eval / Ops</span>
+      <span class="brand-sub lang-fa">مرجع · ارزیابی / عملیات</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta"><span class="pill">Reference</span></div>
+
+    <h1 class="lang-en">Eval / LLM-Ops — cheat sheet</h1>
+    <h1 class="lang-fa">ارزیابی / عملیات — برگهٔ تقلب</h1>
+
+    <p class="lede lang-en">
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §8</a> ·
+      Never mix deterministic and judge suites.
+    </p>
+    <p class="lede lang-fa">
+      <a href="../docs/ARCHITECTURE.md">ARCHITECTURE.md §۸</a> ·
+      سوئیت قطعی و داور را مخلوط نکنید.
+    </p>
+
+    <h2 class="lang-en">Two eval kinds</h2>
+    <h2 class="lang-fa">دو گونه ارزیابی</h2>
+    <ul>
+      <li>
+        <span class="lang-en"><strong>Deterministic</strong> — 0/1: did the right tool fire? · <code>make eval</code> · <code>ops/scoring.py</code></span>
+        <span class="lang-fa"><strong>قطعی</strong> — ۰/۱: آیا ابزار درست شلیک شد؟ · <code>make eval</code></span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>Judge</strong> — scored quality (DeepEval GEval) · <code>make eval-judge</code> · needs API key</span>
+        <span class="lang-fa"><strong>داور</strong> — کیفیت امتیازدار · <code>make eval-judge</code> · نیاز به کلید API</span>
+      </li>
+    </ul>
+
+    <h2 class="lang-en">dataset.jsonl contract</h2>
+    <h2 class="lang-fa">قرارداد dataset.jsonl</h2>
+    <ul>
+      <li><code>expect_tool: null</code> → pass only if no tools fired</li>
+      <li>Else expected tool must appear; <code>expect_in_args</code> = case-insensitive substrings</li>
+      <li>Optional <code>expect_min_tool_calls</code>, <code>setup_fact</code></li>
+      <li class="lang-en">Flagship cases have Persian <code>-fa</code> counterparts</li>
+      <li class="lang-fa">کیس‌های پرچم‌دار جفت فارسی <code>-fa</code> دارند</li>
+    </ul>
+
+    <h2 class="lang-en">Release gate</h2>
+    <h2 class="lang-fa">دروازهٔ انتشار</h2>
+    <p class="lang-en">
+      <code>make gate</code> → deterministic must be 100%; then judge if a key exists.
+      Fail → <code>GATE CLOSED</code>. Pass → <code>GATE OPEN</code>
+      (<code>ops/release_gate.py</code>).
+    </p>
+    <p class="lang-fa">
+      <code>make gate</code> → قطعی باید ۱۰۰٪ باشد؛ بعد داور اگر کلید باشد.
+    </p>
+
+    <h2 class="lang-en">Tracing</h2>
+    <h2 class="lang-fa">ردیابی</h2>
+    <p class="lang-en">
+      Always-on JSONL: <code>.yar/traces/&lt;date&gt;.jsonl</code>.
+      Events: <code>turn_start</code>, <code>llm</code>, <code>tool</code>, <code>gate</code>,
+      <code>consolidation</code>, <code>turn_end</code>, …
+      Optional OTel → Phoenix/Langfuse.
+    </p>
+    <p class="lang-fa">
+      JSONL همیشه روشن است. OTel اختیاری است.
+    </p>
+
+    <nav class="nav-links">
+      <a href="../lessons/0005-eval-ops.html">
+        <span class="lang-en">Lesson 0005</span>
+        <span class="lang-fa">درس ۰۰۰۵</span>
+      </a>
+      <a href="./four-pillars-glossary.html">
+        <span class="lang-en">Glossary</span>
+        <span class="lang-fa">واژه‌نامه</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Yar curriculum reference</span>
+    <span class="lang-fa">مرجع دورهٔ یار</span>
+  </footer>
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>

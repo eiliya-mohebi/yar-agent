@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Glossary — Four Pillars | Yar Curriculum</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body data-lang="en">
+  <header class="site-header">
+    <a class="brand" href="../lessons/0001-four-pillars.html">
+      <span class="brand-name">Yar Curriculum</span>
+      <span class="brand-sub lang-en">Reference · Glossary</span>
+      <span class="brand-sub lang-fa">مرجع · واژه‌نامه</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang-btn="fa" aria-pressed="false">فا</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="lesson-meta">
+      <span class="pill">Reference</span>
+      <span class="lang-en">Keep this open while reading lessons</span>
+      <span class="lang-fa">هنگام خواندن درس‌ها این صفحه را باز بگذارید</span>
+    </div>
+
+    <h1 class="lang-en">Four pillars — glossary</h1>
+    <h1 class="lang-fa">چهار ستون — واژه‌نامه</h1>
+
+    <p class="lede lang-en">
+      Shared vocabulary for this curriculum. Pillar names follow
+      <a href="../docs/ARCHITECTURE.md">Yar’s architecture</a>; industry sources often use
+      overlapping terms (runtime, agent loop, memory, evals).
+    </p>
+    <p class="lede lang-fa">
+      واژگان مشترک این دوره. نام ستون‌ها از
+      <a href="../docs/ARCHITECTURE.md">معماری یار</a> می‌آید؛ منابع صنعتی اغلب واژه‌های هم‌پوشان
+      دارند (runtime، حلقهٔ عامل، حافظه، ارزیابی).
+    </p>
+
+    <h2 class="lang-en">Pillars</h2>
+    <h2 class="lang-fa">ستون‌ها</h2>
+
+    <h3>Harness / Gateway · درگاه</h3>
+    <p class="lang-en">
+      Moves text in and out. No reasoning. In Yar: CLI (<code>yar/gateway/cli.py</code>) and the
+      dashboard SPA talking to the REST API.
+    </p>
+    <p class="lang-fa">
+      متن را وارد و خارج می‌کند؛ استدلال نمی‌کند. در یار: CLI و داشبورد SPA که با API حرف می‌زند.
+    </p>
+
+    <h3>Loop · حلقه</h3>
+    <p class="lang-en">
+      Reason → act → observe until the model replies or hits max iterations. In Yar:
+      <code>yar/loop/agent.py</code> (<code>run_loop</code>).
+    </p>
+    <p class="lang-fa">
+      استدلال ← عمل ← مشاهده تا پاسخ مدل یا سقف تکرار. در یار: <code>run_loop</code>.
+    </p>
+
+    <h3>Memory · حافظه</h3>
+    <p class="lang-en">
+      Durable state beyond one LLM call: semantic facts, episodic events, procedural skills
+      (SKILL.md), plus a retrieval gate and consolidation. In Yar: <code>yar/memory/</code> + SQLite.
+    </p>
+    <p class="lang-fa">
+      حالت پایدار فراتر از یک فراخوانی مدل: حقایق معنایی، رویدادهای اپیزودیک، مهارت‌های رویه‌ای،
+      به‌همراه دروازهٔ بازیابی و تجمیع. در یار: <code>yar/memory/</code> و SQLite.
+    </p>
+
+    <h3>Eval / LLM-Ops · ارزیابی و عملیات</h3>
+    <p class="lang-en">
+      Tracing, dashboards, and release checks. Yar splits <strong>deterministic</strong> evals
+      (0/1: did the right tool fire?) from <strong>judge</strong> evals (scored quality) and never mixes them.
+    </p>
+    <p class="lang-fa">
+      ردیابی، داشبورد، و دروازهٔ انتشار. یار ارزیابی <strong>قطعی</strong> را از ارزیابی
+      <strong>داور</strong> جدا می‌کند و هرگز مخلوطشان نمی‌کند.
+    </p>
+
+    <h2 class="lang-en">Related terms</h2>
+    <h2 class="lang-fa">اصطلاحات وابسته</h2>
+
+    <h3>Working memory · حافظهٔ کاری</h3>
+    <p class="lang-en">
+      Per-turn prompt contents (system + recent history + user message). Ephemeral; rebuilt each turn
+      in <code>Session</code> / <code>Yar.respond()</code>.
+    </p>
+    <p class="lang-fa">
+      محتوای پرامپت هر نوبت. موقت است و هر نوبت دوباره ساخته می‌شود.
+    </p>
+
+    <h3>Tool / function call · ابزار</h3>
+    <p class="lang-en">
+      Model-requested side effect executed by your code; result is fed back into the loop as a
+      <code>role: tool</code> message (OpenAI wire format in Yar).
+    </p>
+    <p class="lang-fa">
+      اثر جانبی‌ای که مدل درخواست می‌کند؛ کد شما اجرا می‌کند و نتیجه را به حلقه برمی‌گرداند.
+    </p>
+
+    <h3>Retrieval gate · دروازهٔ بازیابی</h3>
+    <p class="lang-en">
+      Cheap decision: “does this turn need durable memory?” Avoids stuffing irrelevant facts into
+      every prompt.
+    </p>
+    <p class="lang-fa">
+      تصمیم ارزان: «آیا این نوبت به حافظهٔ پایدار نیاز دارد؟» تا حقایق نامرتبط وارد هر پرامپت نشوند.
+    </p>
+
+    <h3>Agent (industry sense) · عامل</h3>
+    <p class="lang-en">
+      Per Anthropic: systems where an LLM dynamically directs tool use from environmental feedback
+      in a loop — not a fixed workflow alone.
+      Source: <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>.
+    </p>
+    <p class="lang-fa">
+      به‌تعریف Anthropic: سامانه‌هایی که مدل با بازخورد محیط، استفاده از ابزار را در یک حلقه هدایت می‌کند —
+      نه فقط یک گردش‌کار ثابت.
+    </p>
+
+    <nav class="nav-links">
+      <a href="../lessons/0001-four-pillars.html">
+        <span class="lang-en">Lesson 0001 — Four pillars</span>
+        <span class="lang-fa">درس ۰۰۰۱ — چهار ستون</span>
+      </a>
+      <a href="../MISSION.md">MISSION.md</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span class="lang-en">Yar curriculum reference · cite docs/ARCHITECTURE.md for file paths</span>
+    <span class="lang-fa">مرجع دورهٔ یار · مسیر فایل‌ها از docs/ARCHITECTURE.md</span>
+  </footer>
+
+  <script src="../assets/lang-toggle.js"></script>
+</body>
+</html>

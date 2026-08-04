@@ -1,0 +1,105 @@
+/* Dual-gateway figure + boundary checks (lesson 0003+) */
+
+.gateways {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .gateways {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gateway-card {
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+}
+
+.gateway-card h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 1.15rem;
+  margin: 0 0 0.4rem;
+}
+
+.gateway-card .path {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  margin: 0.65rem 0 0;
+  word-break: break-all;
+}
+
+.converge {
+  margin: 0.75rem 0 0;
+  padding: 0.85rem 1rem;
+  text-align: center;
+  border-radius: var(--radius);
+  border: 1px dashed var(--accent);
+  background: var(--accent-soft);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.boundary {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.boundary-item {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.boundary-item p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.boundary-item .choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.boundary-item button {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.boundary-item button.is-correct {
+  border-color: var(--ok);
+  background: #e6ffed;
+}
+
+.boundary-item button.is-wrong {
+  border-color: var(--danger);
+  background: #ffe8e8;
+}
+
+.boundary-item .fb {
+  font-size: 0.88rem;
+  min-height: 1.2em;
+  color: var(--ink-muted);
+}
+
+.boundary-item .fb.ok {
+  color: var(--ok);
+}
+
+.boundary-item .fb.bad {
+  color: var(--danger);
+}

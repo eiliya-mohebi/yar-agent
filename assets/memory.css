@@ -1,0 +1,123 @@
+/* Memory pillar figures (lesson 0004+) */
+
+.mem-types {
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 700px) {
+  .mem-types {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.mem-card {
+  padding: 1rem 1.05rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+}
+
+.mem-card h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 1.05rem;
+  margin: 0 0 0.35rem;
+}
+
+.mem-card .path {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin: 0.55rem 0 0;
+  word-break: break-all;
+}
+
+.mem-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.mem-flow span {
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.mem-flow .arrow {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  padding: 0;
+}
+
+.gate-drill {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.gate-item {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.gate-item .msg {
+  font-weight: 600;
+  margin: 0 0 0.55rem;
+}
+
+.gate-item .choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.gate-item button {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.gate-item button.is-correct {
+  border-color: var(--ok);
+  background: #e6ffed;
+}
+
+.gate-item button.is-wrong {
+  border-color: var(--danger);
+  background: #ffe8e8;
+}
+
+.gate-item .fb {
+  margin-top: 0.45rem;
+  font-size: 0.88rem;
+  min-height: 1.2em;
+  color: var(--ink-muted);
+}
+
+.gate-item .fb.ok {
+  color: var(--ok);
+}
+
+.gate-item .fb.bad {
+  color: var(--danger);
+}
+
+body[data-lang="fa"] .mem-flow,
+body[data-lang="fa"] .mem-card .path {
+  direction: ltr;
+  text-align: left;
+}
