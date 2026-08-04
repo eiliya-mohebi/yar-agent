@@ -231,6 +231,7 @@ eval cases in the release gate — are specified in
 yar-agent/
 ├── AGENTS.md                 # agent instructions (read first)
 ├── README.md                 # this file
+├── lessons/                  # bilingual HTML curriculum (four pillars)
 ├── docs/
 │   ├── README.md             # spec index + reading order
 │   ├── ARCHITECTURE.md       # how the whole system works (start here to rebuild)
@@ -310,6 +311,8 @@ Restart the backend after Python changes; the Vite SPA hot-reloads UI edits.
 
 ## 📚 Where to go next
 
+- **[lessons/](lessons/README.md)** — bilingual HTML curriculum on the four pillars (open
+  [`lessons/index.html`](lessons/index.html) in a browser).
 - **[docs/](docs/README.md)** — spec index and reading order; start here to build.
 - **[AGENTS.md](AGENTS.md)** — rules for coding agents (also [`backend/AGENTS.md`](backend/AGENTS.md),
   [`frontend/AGENTS.md`](frontend/AGENTS.md)).
